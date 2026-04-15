@@ -6,7 +6,7 @@ const pool = mysql2.createPool({
   user: 'root',
   password: process.env.DB_PASSWORD,
   database: 'tms_db',
-  port: 3306,
+  port: 3308,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
