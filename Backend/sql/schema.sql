@@ -3,7 +3,7 @@ CREATE DATABASE tms_db;
 USE tms_db;
 
 -- Users table
-CREATE TABLE Users (
+CREATE TABLE User (
     id CHAR(36) PRIMARY KEY, -- UUID
     name VARCHAR(100) NOT NULL,
     email VARCHAR(150) NOT NULL UNIQUE,
@@ -15,7 +15,7 @@ CREATE TABLE Users (
 );
 
 -- Tasks table
-CREATE TABLE Tasks (
+CREATE TABLE Task (
     id CHAR(36) PRIMARY KEY,
     title VARCHAR(200) NOT NULL,
     description TEXT,
@@ -29,7 +29,7 @@ CREATE TABLE Tasks (
 );
 
 -- TaskAssignments table (many-to-many link between Users and Tasks)
-CREATE TABLE TaskAssignments (
+CREATE TABLE TaskAssignment (
     id CHAR(36) PRIMARY KEY,
     task_id CHAR(36),
     user_id CHAR(36),
@@ -39,7 +39,7 @@ CREATE TABLE TaskAssignments (
 );
 
 -- Comments table
-CREATE TABLE Comments (
+CREATE TABLE Comment (
     id CHAR(36) PRIMARY KEY,
     task_id CHAR(36),
     user_id CHAR(36),
@@ -50,7 +50,7 @@ CREATE TABLE Comments (
 );
 
 -- Attachments table
-CREATE TABLE Attachments (
+CREATE TABLE Attachment (
     id CHAR(36) PRIMARY KEY,
     task_id CHAR(36),
     uploaded_by CHAR(36),
@@ -62,7 +62,7 @@ CREATE TABLE Attachments (
 );
 
 -- Notifications table
-CREATE TABLE Notifications (
+CREATE TABLE Notification (
     id CHAR(36) PRIMARY KEY,
     user_id CHAR(36),
     message TEXT NOT NULL,
