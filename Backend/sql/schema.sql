@@ -25,7 +25,7 @@ CREATE TABLE Task (
     created_by CHAR(36),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (created_by) REFERENCES Users(id)
+    FOREIGN KEY (created_by) REFERENCES User(id)
 );
 
 -- TaskAssignments table (many-to-many link between Users and Tasks)
@@ -34,8 +34,8 @@ CREATE TABLE TaskAssignment (
     task_id CHAR(36),
     user_id CHAR(36),
     assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (task_id) REFERENCES Tasks(id),
-    FOREIGN KEY (user_id) REFERENCES Users(id)
+    FOREIGN KEY (task_id) REFERENCES Task(id),
+    FOREIGN KEY (user_id) REFERENCES User(id)
 );
 
 -- Comments table
@@ -45,8 +45,8 @@ CREATE TABLE Comment (
     user_id CHAR(36),
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (task_id) REFERENCES Tasks(id),
-    FOREIGN KEY (user_id) REFERENCES Users(id)
+    FOREIGN KEY (task_id) REFERENCES Task(id),
+    FOREIGN KEY (user_id) REFERENCES User(id)
 );
 
 -- Attachments table
@@ -57,8 +57,8 @@ CREATE TABLE Attachment (
     file_name VARCHAR(255),
     file_url VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (task_id) REFERENCES Tasks(id),
-    FOREIGN KEY (uploaded_by) REFERENCES Users(id)
+    FOREIGN KEY (task_id) REFERENCES Task(id),
+    FOREIGN KEY (uploaded_by) REFERENCES User(id)
 );
 
 -- Notifications table
@@ -69,5 +69,5 @@ CREATE TABLE Notification (
     type ENUM('assignment','status_change','comment','deadline'),
     is_read BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES Users(id)
+    FOREIGN KEY (user_id) REFERENCES User(id)
 );

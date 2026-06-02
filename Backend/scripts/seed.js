@@ -1,48 +1,52 @@
-const bcrypt = require('bcryptjs');
+require('dotenv').config();
+const bcrypt = require('bcrypt');
 const sequelize = require('../config/database');
-const { User } = require('../models');
+const { User } = require('../models/index');
 
 async function seed() {
   try {
-    await sequelize.sync({ force: false }); // ensure tables exist
+    await sequelize.authenticate();
+    console.log('Database connected.');
 
-    // Hash passwords
-    const adminPass = await bcrypt.hash('admin123', 10);
-    const pmPass = await bcrypt.hash('pm123', 10);
-    const collabPass = await bcrypt.hash('collab123', 10);
+    const hashed = await bcrypt.hash('Password123!', 10);
 
-    // Insert users
+    await User.destroy({ where: {} });
+
     await User.bulkCreate([
       {
         name: 'Admin User',
-        email: 'admin@example.com',
-        password_hash: adminPass,
+        email: 'admin@tms.com',
+        passwordHash: hashed,
         role: 'admin',
-        is_first_login: true,
-        is_active: true
+        isFirstLogin: false,
+        isActive: true,
       },
       {
         name: 'Project Manager',
-        email: 'pm@example.com',
-        password_hash: pmPass,
+        email: 'pm@tms.com',
+        passwordHash: hashed,
         role: 'project_manager',
-        is_first_login: true,
-        is_active: true
+        isFirstLogin: false,
+        isActive: true,
       },
       {
-        name: 'Collaborator User',
-        email: 'collab@example.com',
-        password_hash: collabPass,
+        name: 'Collaborator',
+        email: 'collab@tms.com',
+        passwordHash: hashed,
         role: 'collaborator',
-        is_first_login: true,
-        is_active: true
-      }
+        isFirstLogin: false,
+        isActive: true,
+      },
     ]);
 
-    console.log('✅ Seed data inserted successfully!');
+    console.log('✅ Seed complete! 3 users created.');
+    console.log('   admin@tms.com / Password123!');
+    console.log('   pm@tms.com / Password123!');
+    console.log('   collab@tms.com / Password123!');
     process.exit();
-  } catch (error) {
-    console.error('❌ Error seeding database:', error);
+
+  } catch (err) {
+    console.error('❌ Seed failed:', err.message);
     process.exit(1);
   }
 }
