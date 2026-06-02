@@ -4,7 +4,7 @@ require('../models/index');
 
 async function syncDB() {
   try {
-    await sequelize.sync({ force: false }); 
+    await sequelize.sync({ force: false}); 
     console.log('✅ Tables created successfully!');
     process.exit();
   } catch (error) {
