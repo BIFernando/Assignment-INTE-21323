@@ -21,38 +21,41 @@
     // ── Guard: redirect if not Admin ──────────────
     function requireAdmin() {
       const user = getCurrentUser();
-      if (!user || user.role !== 'ADMIN') {
+      if (!user || user.role !== 'admin') {
         window.location.href = 'dashboard.html';
       }
     }
 
     // ── Render the shared navbar ───────────────────
-    function renderNavbar(activePage) {
-      const user = getCurrentUser();
-      if (!user) return;
+    
+function renderNavbar(activePage) {
+  const user = getCurrentUser();
+  if (!user) return;
 
-      // Build nav links based on role
-      let adminLink = '';
-      if (user.role === 'ADMIN') {
-        adminLink = '<a href="users.html">Users</a>';
-      }
+  // Build nav links based on role
+  let adminLink = '';
 
-      const navbar = `
-        <nav class="navbar">
-          <span class="logo">TMS</span>
-          <div class="nav-links">
-            <a href="dashboard.html">Dashboard</a>
-            <a href="tasks.html">Tasks</a>
-            ${adminLink}
-          </div>
-          <div style="display:flex; align-items:center; gap:12px;">
-            <span class="user-info">${user.name} (${user.role})</span>
-            <button class="btn btn-secondary btn-sm"
-                    onclick="logout()">Logout</button>
-          </div>
-        </nav>
-      `;
+  if (user.role === 'admin') {
+    adminLink = '<a href="users.html">Users</a>';
+  }
 
-      // Insert navbar at the top of the body
-      document.body.insertAdjacentHTML('afterbegin', navbar);
-    }
+  const navbar = `
+    <nav class="navbar">
+      <span class="logo">TMS</span>
+      <div class="nav-links">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="tasks.html">Tasks</a>
+        ${adminLink}
+      </div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span class="user-info">${user.name} (${user.role})</span>
+        <button class="btn btn-secondary btn-sm"
+                onclick="logout()">Logout</button>
+      </div>
+    </nav>
+  `;
+
+  // Insert navbar at the top of the body
+  document.body.insertAdjacentHTML('afterbegin', navbar);
+}
+    
