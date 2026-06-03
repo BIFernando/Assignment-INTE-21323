@@ -7,22 +7,67 @@ const Attachment = require('./Attachment');
 const Notification = require('./Notification');
 
 // Associations
-User.hasMany(Task, { foreignKey: 'created_by', as: 'createdTasks' });
-Task.belongsTo(User, { foreignKey: 'created_by', as: 'creator' });
 
-Task.belongsToMany(User, { through: TaskAssignment, as: 'assignees', foreignKey: 'task_id' });
-User.belongsToMany(Task, { through: TaskAssignment, as: 'assignedTasks', foreignKey: 'user_id' });
+// Task creator
+User.hasMany(Task, {
+  foreignKey: 'createdById',
+  as: 'createdTasks'
+});
 
-Task.hasMany(Comment, { foreignKey: 'task_id' });
-Comment.belongsTo(Task, { foreignKey: 'task_id' });
-Comment.belongsTo(User, { foreignKey: 'user_id' });
+Task.belongsTo(User, {
+  foreignKey: 'createdById',
+  as: 'creator'
+});
 
-Task.hasMany(Attachment, { foreignKey: 'task_id' });
-Attachment.belongsTo(Task, { foreignKey: 'task_id' });
-Attachment.belongsTo(User, { foreignKey: 'uploaded_by' });
+// Task assignments
+Task.belongsToMany(User, {
+  through: TaskAssignment,
+  as: 'assignees',
+  foreignKey: 'taskId',
+  otherKey: 'userId'
+});
 
-User.hasMany(Notification, { foreignKey: 'user_id' });
-Notification.belongsTo(User, { foreignKey: 'user_id' });
+User.belongsToMany(Task, {
+  through: TaskAssignment,
+  as: 'assignedTasks',
+  foreignKey: 'userId',
+  otherKey: 'taskId'
+});
+
+// Comments
+Task.hasMany(Comment, {
+  foreignKey: 'taskId'
+});
+
+Comment.belongsTo(Task, {
+  foreignKey: 'taskId'
+});
+
+Comment.belongsTo(User, {
+  foreignKey: 'userId'
+});
+
+// Attachments
+Task.hasMany(Attachment, {
+  foreignKey: 'taskId'
+});
+
+Attachment.belongsTo(Task, {
+  foreignKey: 'taskId'
+});
+
+Attachment.belongsTo(User, {
+  foreignKey: 'uploadedBy'
+});
+
+// Notifications
+User.hasMany(Notification, {
+  foreignKey: 'userId'
+});
+
+Notification.belongsTo(User, {
+  foreignKey: 'userId'
+});
 
 module.exports = {
   sequelize,
