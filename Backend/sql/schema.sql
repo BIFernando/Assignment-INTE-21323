@@ -3,71 +3,77 @@ CREATE DATABASE tms_db;
 USE tms_db;
 
 -- Users table
-CREATE TABLE User (
-    id CHAR(36) PRIMARY KEY, -- UUID
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(150) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    role ENUM('admin','project_manager','collaborator') NOT NULL,
-    is_first_login BOOLEAN DEFAULT TRUE,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE Users (
+    id            CHAR(36)        PRIMARY KEY,
+    name          VARCHAR(100)    NOT NULL,
+    email         VARCHAR(150)    NOT NULL UNIQUE,
+    passwordHash  VARCHAR(255)    NOT NULL,
+    role          ENUM('admin','project_manager','collaborator') NOT NULL DEFAULT 'collaborator',
+    isFirstLogin  BOOLEAN         DEFAULT TRUE,
+    isActive      BOOLEAN         DEFAULT TRUE,
+    createdAt     TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+    updatedAt     TIMESTAMP       DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Tasks table
-CREATE TABLE Task (
-    id CHAR(36) PRIMARY KEY,
-    title VARCHAR(200) NOT NULL,
-    description TEXT,
-    priority ENUM('low','medium','high') DEFAULT 'medium',
-    status ENUM('todo','in_progress','completed') DEFAULT 'todo',
-    due_date DATE NOT NULL,
-    created_by CHAR(36),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (created_by) REFERENCES User(id)
+CREATE TABLE Tasks (
+    id            CHAR(36)        PRIMARY KEY,
+    title         VARCHAR(200)    NOT NULL,
+    description   TEXT,
+    priority      ENUM('LOW','MEDIUM','HIGH') DEFAULT 'MEDIUM',
+    status        ENUM('TODO','IN_PROGRESS','COMPLETED') DEFAULT 'TODO',
+    dueDate       DATE,                        -- optional, not NOT NULL
+    createdById   CHAR(36),
+    createdAt     TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+    updatedAt     TIMESTAMP       DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (createdById) REFERENCES Users(id)
 );
 
--- TaskAssignments table (many-to-many link between Users and Tasks)
-CREATE TABLE TaskAssignment (
-    id CHAR(36) PRIMARY KEY,
-    task_id CHAR(36),
-    user_id CHAR(36),
-    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (task_id) REFERENCES Task(id),
-    FOREIGN KEY (user_id) REFERENCES User(id)
+-- TaskAssignments table
+CREATE TABLE TaskAssignments (
+    id            CHAR(36)        PRIMARY KEY,
+    taskId        CHAR(36),
+    userId        CHAR(36),
+    assignedAt    TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+    createdAt     TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+    updatedAt     TIMESTAMP       DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (taskId) REFERENCES Tasks(id) ON DELETE CASCADE,
+    FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE
 );
 
 -- Comments table
-CREATE TABLE Comment (
-    id CHAR(36) PRIMARY KEY,
-    task_id CHAR(36),
-    user_id CHAR(36),
-    content TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (task_id) REFERENCES Task(id),
-    FOREIGN KEY (user_id) REFERENCES User(id)
+CREATE TABLE Comments (
+    id            CHAR(36)        PRIMARY KEY,
+    taskId        CHAR(36),
+    userId        CHAR(36),
+    content       TEXT            NOT NULL,
+    createdAt     TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+    updatedAt     TIMESTAMP       DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (taskId) REFERENCES Tasks(id) ON DELETE CASCADE,
+    FOREIGN KEY (userId) REFERENCES Users(id)
 );
 
 -- Attachments table
-CREATE TABLE Attachment (
-    id CHAR(36) PRIMARY KEY,
-    task_id CHAR(36),
-    uploaded_by CHAR(36),
-    file_name VARCHAR(255),
-    file_url VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (task_id) REFERENCES Task(id),
-    FOREIGN KEY (uploaded_by) REFERENCES User(id)
+CREATE TABLE Attachments (
+    id            CHAR(36)        PRIMARY KEY,
+    taskId        CHAR(36),
+    uploadedBy    CHAR(36),
+    fileName      VARCHAR(255),
+    fileUrl       VARCHAR(255),
+    createdAt     TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+    updatedAt     TIMESTAMP       DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (taskId) REFERENCES Tasks(id) ON DELETE CASCADE,
+    FOREIGN KEY (uploadedBy) REFERENCES Users(id)
 );
 
 -- Notifications table
-CREATE TABLE Notification (
-    id CHAR(36) PRIMARY KEY,
-    user_id CHAR(36),
-    message TEXT NOT NULL,
-    type ENUM('assignment','status_change','comment','deadline'),
-    is_read BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES User(id)
+CREATE TABLE Notifications (
+    id            CHAR(36)        PRIMARY KEY,
+    userId        CHAR(36),
+    message       TEXT            NOT NULL,
+    type          ENUM('ASSIGNMENT','STATUS_CHANGE','COMMENT','DEADLINE'),
+    isRead        BOOLEAN         DEFAULT FALSE,
+    createdAt     TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+    updatedAt     TIMESTAMP       DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE
 );
