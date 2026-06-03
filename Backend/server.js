@@ -15,10 +15,7 @@ const app = express();
 app.use(helmet());
 
 // Allow requests from your frontend
-app.use(cors({
-  origin: process.env.CLIENT_URL,
-  credentials: true
-}));
+app.use(cors());
 
 // Parse incoming JSON request bodies
 app.use(express.json());
