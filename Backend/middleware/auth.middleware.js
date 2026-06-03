@@ -29,16 +29,16 @@ const jwt = require('jsonwebtoken');
  
     // CHECK 2: Does the user have the required role?
     const authorizeRoles = (...roles) => {
-      return (req, res, next) => {
-         const userRole = req.user.role.toUpperCase();
-    const allowedRoles = roles.map(r => r.toUpperCase());
-        if (!roles.includes(req.user.role)) {
-          return res.status(403).json({
-            error: 'Forbidden. You do not have permission to do this.'
-          });
-        }
-        next(); // role is allowed, continue
-      };
-    };
+  return (req, res, next) => {
+    const userRole = req.user.role;           // e.g., "admin"
+    const allowed = roles.some(r => r.toLowerCase() === userRole.toLowerCase());
+    if (!allowed) {
+      return res.status(403).json({
+        error: 'Forbidden. You do not have permission to do this.'
+      });
+    }
+    next();
+  };
+};
  
     module.exports = { verifyToken, authorizeRoles };
