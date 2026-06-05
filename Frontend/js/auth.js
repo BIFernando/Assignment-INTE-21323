@@ -47,15 +47,40 @@ function renderNavbar(activePage) {
         <a href="tasks.html">Tasks</a>
         ${adminLink}
       </div>
-      <div style="display:flex; align-items:center; gap:12px;">
-        <span class="user-info">${user.name} (${user.role})</span>
-        <button class="btn btn-secondary btn-sm"
-                onclick="logout()">Logout</button>
-      </div>
+      
+    <div style="display:flex; align-items:center; gap:12px;">
+
+  <div style="position:relative; cursor:pointer;"
+       onclick="toggleNotifications()">
+    🔔
+    <span id="notifBadge" style="
+      position:absolute;
+      top:-6px;
+      right:-8px;
+      background:#e53e3e;
+      color:white;
+      border-radius:50%;
+      width:18px;
+      height:18px;
+      font-size:11px;
+      display:none;
+      align-items:center;
+      justify-content:center;">
+      0
+    </span>
+  </div>
+
+  <span class="user-info">${user.name} (${user.role})</span>
+
+  <button class="btn btn-secondary btn-sm"
+          onclick="logout()">Logout</button>
+
+</div>  
     </nav>
   `;
 
   // Insert navbar at the top of the body
   document.body.insertAdjacentHTML('afterbegin', navbar);
 }
+
     
