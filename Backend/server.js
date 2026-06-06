@@ -9,8 +9,8 @@ require('./models/index');
 
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
-const taskRoutes = require('./routes/task.routes');  // moved up for clarity
-const notificationRoutes = require('./routes/notification.routes');
+const taskRoutes = require('./routes/task.routes');  
+const notificationRoutes = require('./routes/notification.routes');// moved up for clarity
 
 const app = express();
 const server = http.createServer(app);
@@ -42,6 +42,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/uploads', express.static('uploads'));
+app.use('/api/notifications', notificationRoutes);
+
 
 // ---------- ERROR HANDLERS (must be after all routes) ----------
 

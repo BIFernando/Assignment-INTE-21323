@@ -19,7 +19,7 @@ router.use(verifyToken);
 // ── TASK ROUTES ────────────────────────────────────────
 
 // Create task — Project Managers and Admins only
-router.post('/', authorizeRoles('ADMIN', 'PROJECT_MANAGER'), createTask);
+router.post('/', authorizeRoles('admin', 'project_manager'), createTask);
 
 // Get all tasks — all roles can view
 router.get('/', getAllTasks);
@@ -31,10 +31,10 @@ router.get('/:id', getTaskById);
 router.put('/:id', updateTask);
 
 // Delete task — Project Managers and Admins only
-router.delete('/:id', authorizeRoles('ADMIN', 'PROJECT_MANAGER'), deleteTask);
+router.delete('/:id', authorizeRoles('admin', 'project_manager'), deleteTask);
 
 // Assign users to a task — Project Managers and Admins only
-router.post('/:id/assign', authorizeRoles('ADMIN', 'PROJECT_MANAGER'), assignUsers);
+router.post('/:id/assign', authorizeRoles('admin', 'project_manager'), assignUsers);
 
 // ── COMMENT ROUTES ─────────────────────────────────────
 
