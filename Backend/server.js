@@ -2,6 +2,8 @@ require('dotenv').config();
 const express   = require('express');
 const cors      = require('cors');
 const helmet    = require('helmet');
+const http      = require('http');
+const { Server } = require('socket.io');
 const sequelize = require('./config/database');
 require('./models/index');
 
@@ -11,6 +13,19 @@ const taskRoutes = require('./routes/task.routes');
 const notificationRoutes = require('./routes/notification.routes');// moved up for clarity
 
 const app = express();
+const server = http.createServer(app);
+ 
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
+});
+
+app.set('io', io);
+//Intialize socket handling
+const { initializeSocket } = require('./services/socket.service');
+initializeSocket(io);
 
 // Security middleware
 app.use(helmet());
@@ -25,6 +40,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/notifications', notificationRoutes);
 app.use('/uploads', express.static('uploads'));
 app.use('/api/notifications', notificationRoutes);
 
@@ -66,10 +82,11 @@ const PORT = process.env.PORT || 5000;
 sequelize.authenticate()
   .then(() => {
     console.log('Database connected successfully.');
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log('Server is running on port ' + PORT);
     });
   })
   .catch(err => {
     console.error('Could not connect to database:', err);
   });
+  module.exports = { io };
