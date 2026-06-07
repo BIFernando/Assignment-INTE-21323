@@ -1,5 +1,6 @@
 const { Task, User, TaskAssignment } = require('../models/index');
 const { Op } = require('sequelize');
+const { createNotification } = require('../services/notification.service');
 
 // ── CREATE TASK ────────────────────────────────────────
 const createTask = async (req, res) => {
@@ -34,6 +35,16 @@ const createTask = async (req, res) => {
         userId: userId,
       }));
       await TaskAssignment.bulkCreate(assignments);
+       const io = req.app.get('io');
+
+  for (const userId of assigneeIds) {
+    await createNotification(
+      io,
+      userId,
+      'You have been assigned a new task: ' + title,
+      'ASSIGNMENT'
+    );
+  }
     }
 
     res.status(201).json({
@@ -128,9 +139,44 @@ const updateTask = async (req, res) => {
       await task.update({ status });
       return res.status(200).json({ message: 'Task status updated.' });
     }
+await task.update({
+  title,
+  description,
+  priority,
+  status,
+  dueDate
+});
 
-    await task.update({ title, description, priority, status, dueDate });
-    res.status(200).json({ message: 'Task updated successfully.' });
+// Load task with assignees
+const taskWithAssignees = await Task.findByPk(id, {
+  include: [
+    {
+      model: User,
+      as: 'assignees'
+    }
+  ]
+});
+
+const io = req.app.get('io');
+
+if (taskWithAssignees && taskWithAssignees.assignees) {
+
+  for (const assignee of taskWithAssignees.assignees) {
+
+    await createNotification(
+      io,
+      assignee.id,
+      'Task "' + task.title + '" status changed to ' + status,
+      'STATUS_CHANGE'
+    );
+  }
+}
+
+res.status(200).json({
+  message: 'Task updated successfully.'
+});
+
+
   } catch (err) {
     res.status(500).json({ error: 'Server error.', details: err.message });
   }

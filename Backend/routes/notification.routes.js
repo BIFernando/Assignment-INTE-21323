@@ -1,24 +1,19 @@
-const express    = require('express');
-const router     = express.Router();
+const express = require('express');
+const router  = express.Router();
 const { verifyToken } = require('../middleware/auth.middleware');
+const {
+  getMyNotifications,
+  markAsRead,
+  markAllAsRead,
+  getUnreadCount,
+} = require('../controllers/notification.controller');
 
-// Placeholder routes — will be fully built in Phase 6
+// All notification routes require authentication
 router.use(verifyToken);
 
-router.get('/', (req, res) => {
-  res.status(200).json([]);
-});
-
-router.get('/unread', (req, res) => {
-  res.status(200).json({ count: 0 });
-});
-
-router.put('/read-all', (req, res) => {
-  res.status(200).json({ message: 'OK' });
-});
-
-router.put('/:id/read', (req, res) => {
-  res.status(200).json({ message: 'OK' });
-});
+router.get('/',           getMyNotifications);
+router.get('/unread',     getUnreadCount);
+router.put('/read-all',   markAllAsRead);
+router.put('/:id/read',   markAsRead);
 
 module.exports = router;
