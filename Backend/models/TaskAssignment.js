@@ -5,7 +5,7 @@ const TaskAssignment = sequelize.define('TaskAssignment', {
   id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
   assigned_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
 }, {
-  timestamps: false
+  timestamps: true
 });
 
 module.exports = TaskAssignment;
