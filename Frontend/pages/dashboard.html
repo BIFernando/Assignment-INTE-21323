@@ -1,116 +1,172 @@
     <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <title>Dashboard — TMS</title>
 
-      <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — TaskFlow TMS</title>
 
-      <link rel="stylesheet" href="../css/main.css">
-      <link rel="stylesheet" href="../css/components.css">
-    </head>
-    <body>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 
-      <div class="container">
-        <div class="page-header">
-          <h1 class="page-title">Dashboard</h1>
-        </div>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
 
-        <!-- Summary Cards -->
-        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-bottom:30px;">
-          <div class="card" style="text-align:center;">
-            <div style="font-size:36px; font-weight:700; color:#7c8cff;"
-                 id="countTodo">—</div>
-            <div style="color:#888; margin-top:4px;">To Do</div>
-          </div>
-          <div class="card" style="text-align:center;">
-            <div style="font-size:36px; font-weight:700; color:#63b3ed;"
-                 id="countInProgress">—</div>
-            <div style="color:#888; margin-top:4px;">In Progress</div>
-          </div>
-          <div class="card" style="text-align:center;">
-            <div style="font-size:36px; font-weight:700; color:#68d391;"
-                 id="countDone">—</div>
-            <div style="color:#888; margin-top:4px;">Completed</div>
-          </div>
-        </div>
+  <!-- Sidebar injected by auth.js -->
 
-        <!-- Recent Tasks Table -->
-        <div class="card">
-          <h2 style="margin-bottom:16px; font-size:18px;">Recent Tasks</h2>
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Priority</th>
-                <th>Status</th>
-                <th>Due Date</th>
-              </tr>
-            </thead>
-            <tbody id="recentTasksBody">
-              <tr><td colspan="4">Loading...</td></tr>
-            </tbody>
-          </table>
-        </div>
+  <div class="app-layout">
+    <div class="main-content">
 
+``
+  <!-- Topbar -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Dashboard</div>
+      <div class="topbar-subtitle">Overview of your tasks</div>
+    </div>
+
+    <div class="topbar-actions">
+      <button class="notif-btn" id="notifBtn">
+        <i class="bi bi-bell"></i>
+        <span class="notif-badge" id="notifBadge"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="stat-grid">
+
+    <div class="stat-card">
+      <div class="stat-icon indigo">
+        <i class="bi bi-list-check" style="color:var(--primary);"></i>
       </div>
+      <div class="stat-info">
+        <div class="stat-value" id="countTotal">0</div>
+        <div class="stat-label">Total Tasks</div>
+      </div>
+    </div>
 
-      <script src="../js/api.js"></script>
-      <script src="../js/auth.js"></script>
-      <script src="../js/socket.js"></script>
-      <script>
-        requireAuth();
-        renderNavbar('dashboard');
+    <div class="stat-card">
+      <div class="stat-icon amber">
+        <i class="bi bi-hourglass-split" style="color:var(--warning);"></i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value" id="countTodo">0</div>
+        <div class="stat-label">To Do</div>
+      </div>
+    </div>
 
-        async function loadDashboard() {
-          try {
-            const tasks = await taskAPI.getAll();
+    <div class="stat-card">
+      <div class="stat-icon blue">
+        <i class="bi bi-arrow-repeat" style="color:#3B82F6;"></i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value" id="countInProgress">0</div>
+        <div class="stat-label">In Progress</div>
+      </div>
+    </div>
 
-            // Count by status
-            const todo       = tasks.filter(t => t.status === 'TODO').length;
-            const inProgress = tasks.filter(t => t.status === 'IN_PROGRESS').length;
-            const done       = tasks.filter(t => t.status === 'COMPLETED').length;
+    <div class="stat-card">
+      <div class="stat-icon emerald">
+        <i class="bi bi-check-circle" style="color:var(--success);"></i>
+      </div>
+      <div class="stat-info">
+        <div class="stat-value" id="countDone">0</div>
+        <div class="stat-label">Completed</div>
+      </div>
+    </div>
 
-            document.getElementById('countTodo').textContent       = todo;
-            document.getElementById('countInProgress').textContent = inProgress;
-            document.getElementById('countDone').textContent       = done;
+  </div>
 
-            // Show 5 most recent tasks in table
-            const recent = tasks.slice(0, 5);
-            const tbody  = document.getElementById('recentTasksBody');
+  <!-- Recent Tasks -->
+  <div class="card">
+    <div class="section-header">
+      <div class="section-title">Recent Tasks</div>
 
-            if (recent.length === 0) {
-              tbody.innerHTML = '<tr><td colspan="4">No tasks yet.</td></tr>';
-              return;
-            }
+      <a href="tasks.html" class="btn btn-ghost btn-sm">
+        View All
+        <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
 
-            tbody.innerHTML = recent.map(task => `
-              <tr style="cursor:pointer;"
-                  onclick="window.location.href='task-detail.html?id=${task.id}'">
-                <td>${task.title}</td>
-                <td>
-                  <span class="badge badge-${task.priority.toLowerCase()}">
-                    ${task.priority}
-                  </span>
-                </td>
-                <td>
-                  <span class="badge status-${task.status.toLowerCase()}">
-                    ${task.status.replace('_', ' ')}
-                  </span>
-                </td>
-                <td>${task.dueDate
-                      ? new Date(task.dueDate).toLocaleDateString()
-                      : 'No deadline'}</td>
-              </tr>
-            `).join('');
+    <div class="table-wrapper" style="border:none; box-shadow:none;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Task</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Due Date</th>
+          </tr>
+        </thead>
 
-          } catch (err) {
-            console.error('Dashboard load error:', err);
-          }
+        <tbody id="recentTasksBody">
+          <tr>
+            <td colspan="4">Loading...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+```
+
+  </div>
+
+  <script src="../js/api.js"></script>
+
+  <script src="../js/auth.js"></script>
+
+  <script src="../js/socket.js"></script>
+
+  <script>
+    requireAuth();
+    renderSidebar('dashboard');
+
+    async function loadDashboard() {
+      try {
+        const tasks = await taskAPI.getAll();
+
+        const total = tasks.length;
+        const todo = tasks.filter(t => t.status === 'TODO').length;
+        const inProgress = tasks.filter(t => t.status === 'IN_PROGRESS').length;
+        const done = tasks.filter(t => t.status === 'COMPLETED').length;
+
+        document.getElementById('countTotal').textContent = total;
+        document.getElementById('countTodo').textContent = todo;
+        document.getElementById('countInProgress').textContent = inProgress;
+        document.getElementById('countDone').textContent = done;
+
+        const recent = tasks.slice(0, 5);
+        const tbody = document.getElementById('recentTasksBody');
+
+        if (recent.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="4">No tasks yet.</td></tr>';
+          return;
         }
 
-        loadDashboard();
-      </script>
+        tbody.innerHTML = recent.map(task => `
+          <tr onclick="window.location.href='task-detail.html?id=${task.id}'"
+              style="cursor:pointer;">
+            <td>${task.title}</td>
+            <td>${task.priority}</td>
+            <td>${task.status.replace('_',' ')}</td>
+            <td>${task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No deadline'}</td>
+          </tr>
+        `).join('');
 
-    </body>
-    </html>
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    loadDashboard();
+  </script>
+
+</body>
+</html>

@@ -31,9 +31,21 @@
     function renderList() {
       const tbody = document.getElementById('taskTableBody');
       if (allTasks.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6">No tasks found.</td></tr>';
-        return;
-      }
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="6">
+        <div class="empty-state">
+          <div class="empty-icon">📋</div>
+          <div class="empty-title">No tasks found</div>
+          <div class="empty-desc">
+            Tasks you create will appear here.
+          </div>
+        </div>
+      </td>
+    </tr>
+  `;
+  return;
+}
       tbody.innerHTML = allTasks.map(task => `
         <tr>
           <td>
@@ -78,20 +90,45 @@
         const counter   = document.getElementById('count-' + status);
 
         counter.textContent = cards.length;
+        if (cards.length === 0) {
+  container.innerHTML = `
+    <div style="text-align:center; padding:30px 16px; color:var(--text-muted);">
+      <i class="bi bi-inbox" style="font-size:28px; opacity:0.3;"></i>
+      <div style="font-size:13px; margin-top:8px;">
+        No tasks here
+      </div>
+    </div>
+  `;
+  return;
+}
 
-        container.innerHTML = cards.map(task => `
-          <div class="kanban-card" data-id="${task.id}">
-            <div class="kanban-card-title">${task.title}</div>
-            <div class="kanban-card-meta">
-              <span class="badge badge-${task.priority.toLowerCase()}">
-                ${task.priority}
-              </span>
-              ${task.dueDate
-                ? '<span>Due: ' + new Date(task.dueDate).toLocaleDateString() + '</span>'
-                : ''}
-            </div>
-          </div>
-        `).join('');
+      container.innerHTML = cards.map(task => `
+
+  <div class="kanban-card priority-${task.priority.toLowerCase()}"
+       data-id="${task.id}"
+       onclick="window.location.href='task-detail.html?id=${task.id}'">
+
+
+<div class="kanban-card-title">
+  ${DOMPurify.sanitize(task.title)}
+</div>
+
+<div class="kanban-card-meta">
+  <span class="badge badge-${task.priority.toLowerCase()}">
+    ${task.priority}
+  </span>
+
+  ${task.dueDate ? `
+    <span class="kanban-card-date">
+      <i class="bi bi-calendar3"></i>
+      ${new Date(task.dueDate).toLocaleDateString()}
+    </span>
+  ` : ''}
+</div>
+
+  </div>
+`).join('');
+
       });
 
       // Enable drag and drop between columns using SortableJS
