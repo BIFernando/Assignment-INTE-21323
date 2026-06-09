@@ -1,21 +1,65 @@
-const express    = require('express');
-    const router     = express.Router();
-    const { verifyToken, authorizeRoles } = require('../middleware/auth.middleware');
-    const { createUser, getAllUsers, updateUser, deactivateUser }
-      = require('../controllers/user.controller');
- 
-    // Apply both middleware to ALL routes in this file
-    // Only logged-in Admins can access user management
-    router.use(verifyToken, authorizeRoles('admin'));
- 
-    // POST   /api/users           → create a new user
-    // GET    /api/users           → get all users
-    // PUT    /api/users/:id       → update a user
-    // PATCH  /api/users/:id/deactivate → deactivate a user
- 
-    router.post('/',                 createUser);
-    router.get('/',                  getAllUsers);
-    router.put('/:id',               updateUser);
-    router.patch('/:id/deactivate',  deactivateUser);
- 
-    module.exports = router;
+const express = require('express');
+const router = express.Router();
+const { body, validationResult } = require('express-validator');
+const { verifyToken, authorizeRoles } = require('../middleware/auth.middleware');
+const { createUser, getAllUsers, updateUser, deactivateUser } = require('../controllers/user.controller');
+
+// Validation rules for creating a user
+const createUserValidation = [
+  body('name')
+    .trim()
+    .notEmpty()
+    .withMessage('Name is required.')
+    .isLength({ max: 100 })
+    .withMessage('Name cannot exceed 100 characters.')
+    .escape(),
+  body('email')
+    .trim()
+    .isEmail()
+    .withMessage('Please provide a valid email address.')
+    .normalizeEmail(),
+  body('role')
+    .isIn(['admin', 'project_manager', 'collaborator'])
+    .withMessage('Role must be admin, project_manager, or collaborator.'),
+];
+
+// Validation rules for updating a user
+const updateUserValidation = [
+  body('name')
+    .optional()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage('Name cannot exceed 100 characters.')
+    .escape(),
+  body('role')
+    .optional()
+    .isIn(['admin', 'project_manager', 'collaborator'])
+    .withMessage('Invalid role value.'),
+];
+
+// Validation middleware
+const validate = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      errorCode: 400,
+      message: 'Validation failed.',
+      errors: errors.array().map(e => ({
+        field: e.path,
+        message: e.msg,
+      }))
+    });
+  }
+  next();
+};
+
+// Apply authentication and authorization to all routes
+router.use(verifyToken, authorizeRoles('admin'));
+
+// Routes with validation
+router.post('/', createUserValidation, validate, createUser);
+router.get('/', getAllUsers);
+router.put('/:id', updateUserValidation, validate, updateUser);
+router.patch('/:id/deactivate', deactivateUser);
+
+module.exports = router;

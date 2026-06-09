@@ -1,9 +1,14 @@
 require('dotenv').config();
+
+const morgan = require('morgan');
+const hpp = require('hpp');
+
 const express   = require('express');
 const cors      = require('cors');
 const helmet    = require('helmet');
 const http      = require('http');
 const { Server } = require('socket.io');
+
 const sequelize = require('./config/database');
 require('./models/index');
 
@@ -28,13 +33,22 @@ const { initializeSocket } = require('./services/socket.service');
 initializeSocket(io);
 
 // Security middleware
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false
+}));
 
-// Allow requests from your frontend
-app.use(cors());
+app.use(morgan('dev'));
 
-// Parse incoming JSON request bodies
-app.use(express.json());
+const corsOptions = {
+  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+};
+app.use(cors(corsOptions));
+
+app.use(express.json({ limit: '10kb' }));
+app.use(hpp());
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -45,43 +59,41 @@ app.use('/uploads', express.static('uploads'));
 app.use('/api/notifications', notificationRoutes);
 
 
-// ---------- ERROR HANDLERS (must be after all routes) ----------
+// Test route
+app.get('/', (req, res) => {
+  res.json({ message: 'TMS Server is running!', security: 'Phase 7 hardening active' });
+});
 
-// 404 handler for routes that do not exist
+// 404 handler
 app.use((req, res) => {
   res.status(404).json({
     errorCode: 404,
     message: 'Route not found.',
-    description: req.originalUrl + ' does not exist on this server.'
+    description: req.originalUrl + ' does not exist.'
   });
 });
 
 // Global error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
-
-  // Handle Multer file errors specifically
-  if (err.message === 'File type not allowed.') {
-    return res.status(400).json({
-      errorCode: 400,
-      message: 'Bad Request',
-      description: 'File type is not allowed. Use PDF, JPG, PNG, or DOC.'
-    });
-  }
-
   res.status(err.status || 500).json({
     errorCode: err.status || 500,
     message: err.message || 'Internal Server Error',
-    description: 'An unexpected error occurred. Please try again.'
+    description: 'An unexpected error occurred.'
   });
 });
 
-// ---------- START SERVER ----------
 const PORT = process.env.PORT || 5000;
 
 sequelize.authenticate()
   .then(() => {
     console.log('Database connected successfully.');
+    app.listen(PORT, () => {
+      console.log('Server running on port ' + PORT);
+      console.log('Security: Helmet, CORS, HPP, Morgan active');
+    });
+  })
+  .catch(err => console.error('Database connection failed:', err));
     server.listen(PORT, () => {
       console.log('Server is running on port ' + PORT);
     });
