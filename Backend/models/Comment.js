@@ -2,12 +2,25 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const Comment = sequelize.define('Comment', {
-  id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-  content: { type: DataTypes.TEXT, allowNull: false },
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true,
+  },
+  taskId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+  },
+  userId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+  },
+  content: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
 }, {
   timestamps: true,
-  createdAt: 'created_at',
-  updatedAt: false
 });
 
 module.exports = Comment;

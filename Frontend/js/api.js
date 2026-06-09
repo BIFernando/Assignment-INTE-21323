@@ -129,3 +129,26 @@
           headers: authHeaders(),
         }).then(handleResponse),
     };
+    const notificationAPI = {
+  getAll: () =>
+    fetch(API_BASE + '/notifications', {
+      headers: authHeaders(),
+    }).then(handleResponse),
+
+  getUnreadCount: () =>
+    fetch(API_BASE + '/notifications/unread', {
+      headers: authHeaders(),
+    }).then(handleResponse),
+
+  markAsRead: (id) =>
+    fetch(API_BASE + '/notifications/' + id + '/read', {
+      method: 'PUT',
+      headers: authHeaders(),
+    }).then(handleResponse),
+
+  markAllAsRead: () =>
+    fetch(API_BASE + '/notifications/read-all', {
+      method: 'PUT',
+      headers: authHeaders(),
+    }).then(handleResponse),
+};

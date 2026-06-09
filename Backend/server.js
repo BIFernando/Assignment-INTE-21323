@@ -1,16 +1,36 @@
 require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
+
 const morgan = require('morgan');
 const hpp = require('hpp');
+
+const express   = require('express');
+const cors      = require('cors');
+const helmet    = require('helmet');
+const http      = require('http');
+const { Server } = require('socket.io');
+
 const sequelize = require('./config/database');
 require('./models/index');
 
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
+const taskRoutes = require('./routes/task.routes');  
+const notificationRoutes = require('./routes/notification.routes');// moved up for clarity
 
 const app = express();
+const server = http.createServer(app);
+ 
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
+});
+
+app.set('io', io);
+//Intialize socket handling
+const { initializeSocket } = require('./services/socket.service');
+initializeSocket(io);
 
 // Security middleware
 app.use(helmet({
@@ -33,7 +53,11 @@ app.use(hpp());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/tasks', taskRoutes);
+app.use('/api/notifications', notificationRoutes);
 app.use('/uploads', express.static('uploads'));
+app.use('/api/notifications', notificationRoutes);
+
 
 // Test route
 app.get('/', (req, res) => {
@@ -70,3 +94,11 @@ sequelize.authenticate()
     });
   })
   .catch(err => console.error('Database connection failed:', err));
+    server.listen(PORT, () => {
+      console.log('Server is running on port ' + PORT);
+    });
+  })
+  .catch(err => {
+    console.error('Could not connect to database:', err);
+  });
+  module.exports = { io };
