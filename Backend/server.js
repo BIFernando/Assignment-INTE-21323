@@ -39,8 +39,19 @@ app.use(helmet({
 
 app.use(morgan('dev'));
 
+
+// Parse incoming JSON request bodies
+app.use(express.json());
+
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'http://127.0.0.1:5500'
+  ],
+
 const corsOptions = {
   origin: process.env.CLIENT_URL || 'http://localhost:3000',
+
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -49,6 +60,7 @@ app.use(cors(corsOptions));
 
 app.use(express.json({ limit: '10kb' }));
 app.use(hpp());
+
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -95,10 +107,15 @@ sequelize.authenticate()
   })
   .catch(err => console.error('Database connection failed:', err));
     server.listen(PORT, () => {
-      console.log('Server is running on port ' + PORT);
+
+      console.log('Server running on port ' + PORT);
+      console.log('Security: Helmet, CORS, HPP, Morgan active');
+
     });
   })
   .catch(err => {
-    console.error('Could not connect to database:', err);
+    console.error('Database connection failed:', err);
   });
+
   module.exports = { io };
+

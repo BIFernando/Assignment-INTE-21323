@@ -43,31 +43,8 @@
       }
     }
 
-    // ── TOAST NOTIFICATION POPUP ──────────────────────
-    // Shows a small popup at the top right of the screen
-    function showNotificationToast(message) {
-      const toast = document.createElement('div');
-      toast.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #1a1a2e;
-        color: white;
-        padding: 14px 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        z-index: 9999;
-        font-size: 14px;
-        max-width: 320px;
-        animation: slideIn 0.3s ease;
-      `;
-      toast.textContent = '🔔 ' + message;
-      document.body.appendChild(toast);
-
-      // Remove after 4 seconds
-      setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.3s';
-        setTimeout(() => toast.remove(), 300);
-      }, 4000);
-    }
+    socket.on('notification', (notification) => {
+  console.log('New notification:', notification);
+  showToast('New Notification', notification.message, 'info'); // uses auth.js showToast
+  loadUnreadCount();
+});

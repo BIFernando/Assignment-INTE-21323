@@ -1,5 +1,74 @@
     <!DOCTYPE html>
 
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <title>Task Detail — TMS</title>
+
+      <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+      <link rel="stylesheet" href="../css/main.css">
+      <link rel="stylesheet" href="../css/components.css">
+    </head>
+    <body>
+      <div class="container">
+
+        <div class="page-header">
+          <a href="tasks.html"
+             style="color:#7c8cff;">&larr; Back to Tasks</a>
+        </div>
+
+        <!-- Task Info Card -->
+        <div class="card" id="taskCard">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <h2 id="taskTitle" style="font-size:22px; margin-bottom:8px;">
+                Loading...
+              </h2>
+              <div id="taskMeta" style="color:#888; font-size:14px;"></div>
+            </div>
+            <div id="statusSelector"></div>
+          </div>
+          <p id="taskDescription" style="margin-top:16px; color:#555;"></p>
+          <div id="taskAssignees" style="margin-top:12px; font-size:14px;"></div>
+        </div>
+
+
+        <!-- Comments Section -->
+        <div class="card">
+          <h3 style="margin-bottom:16px;">Comments</h3>
+          <div id="commentsList"></div>
+          <div class="form-group" style="margin-top:12px;">
+            <textarea id="commentInput" rows="3"
+                      placeholder="Write a comment..."></textarea>
+          </div>
+          <button class="btn btn-primary btn-sm" id="addCommentBtn">
+            Add Comment
+          </button>
+        </div>
+
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Task Details</div>
+      <div class="topbar-subtitle">View and manage task information</div>
+    </div>
+
+
+        <!-- Attachments Section -->
+        <div class="card">
+          <h3 style="margin-bottom:16px;">Attachments</h3>
+          <div id="attachmentsList"></div>
+          <div style="margin-top:12px;">
+            <input type="file" id="fileInput" style="margin-bottom:8px;">
+            <button class="btn btn-secondary btn-sm" id="uploadBtn">
+              Upload File
+            </button>
+          </div>
+        </div>
+
+
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -18,7 +87,7 @@
   <div class="app-layout">
     <div class="main-content">
 
-```
+
   <!-- Topbar -->
   <div class="topbar">
     <div>
@@ -50,6 +119,14 @@
         </h2>
         <div id="taskMeta" style="color:#888; font-size:14px;"></div>
       </div>
+
+
+      <script src="../js/api.js"></script>
+      <script src="../js/auth.js"></script>
+      <script src="../js/socket.js"></script>
+      <script src="../js/task-detail.js"></script>
+    </body>
+    </html>
 
       <div id="statusSelector"></div>
     </div>
@@ -98,7 +175,7 @@
   </div>
 
 </div>
-```
+
 
   </div>
 
@@ -117,3 +194,4 @@
 
 </body>
 </html>
+
