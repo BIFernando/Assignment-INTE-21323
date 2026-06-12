@@ -1,4 +1,4 @@
-<<<<<<< Updated upstream
+
 /* ── Reset & Base ───────────────────────────── */
     * {
       margin: 0;
@@ -172,7 +172,7 @@
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
-=======
+
 /* ============================================================
    TMS DESIGN SYSTEM
    Primary: #4F46E5 | Background: #F8FAFC | Text: #1F2937
@@ -412,7 +412,9 @@ img { max-width: 100%; }
   align-items: center;
   justify-content: space-between;
   margin-bottom: 28px;
+
    z-index: 100;
+
 }
 
 .topbar-title {
@@ -1118,6 +1120,7 @@ img { max-width: 100%; }
   }
 }
 
+
 /* ── Notification Panel ──────────────────────── */
 .notif-overlay {
   display: none;
@@ -1237,4 +1240,4 @@ img { max-width: 100%; }
   justify-content: flex-end;
   flex-shrink: 0;
 }
->>>>>>> Stashed changes
+

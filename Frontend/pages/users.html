@@ -1,80 +1,8 @@
+
     <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <title>User Management — TMS</title>
 
-<<<<<<< Updated upstream
-      <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 
-      <link rel="stylesheet" href="../css/main.css">
-      <link rel="stylesheet" href="../css/components.css">
-    </head>
-    <body>
 
-      <!-- Create User Modal -->
-      <div class="modal-overlay" id="createUserModal">
-        <div class="modal">
-          <div class="modal-header">
-            <span class="modal-title">Create New User</span>
-            <span class="modal-close" id="closeUserModal">&times;</span>
-          </div>
-          <div class="alert error" id="userModalError"></div>
-          <div class="form-group">
-            <label>Full Name *</label>
-            <input type="text" id="userName" placeholder="John Smith">
-          </div>
-          <div class="form-group">
-            <label>Email Address *</label>
-            <input type="email" id="userEmail" placeholder="john@example.com">
-          </div>
-          <div class="form-group">
-            <label>Role *</label>
-            <select id="userRole">
-              <option value="COLLABORATOR">Collaborator</option>
-              <option value="PROJECT_MANAGER">Project Manager</option>
-              <option value="ADMIN">Admin</option>
-            </select>
-          </div>
-          <button class="btn btn-primary" id="saveUserBtn"
-                  style="width:100%;">Create User & Send Email</button>
-        </div>
-      </div>
-
-      <div class="container">
-        <div class="page-header">
-          <h1 class="page-title">User Management</h1>
-          <button class="btn btn-primary" id="createUserBtn">
-            + New User
-          </button>
-        </div>
-
-        <div class="alert success" id="successAlert"></div>
-        <div class="alert error"   id="errorAlert"></div>
-
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="usersTableBody">
-            <tr><td colspan="5">Loading...</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <script src="../js/api.js"></script>
-      <script src="../js/auth.js"></script>
-      <script src="../js/socket.js"></script>
-      <script src="../js/users.js"></script>
-    </body>
-    </html>
-=======
 <html lang="en">
 
 <head>
@@ -194,4 +122,5 @@
 </body>
 
 </html>
->>>>>>> Stashed changes
+
+

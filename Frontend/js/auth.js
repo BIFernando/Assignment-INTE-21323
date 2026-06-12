@@ -1,24 +1,20 @@
-// ── Logout ─────────────────────────────────────
-    function logout() {
+function logout() {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = 'login.html';
     }
 
-    // ── Get current logged in user ─────────────────
     function getCurrentUser() {
-      const user = localStorage.getItem('user');
-      return user ? JSON.parse(user) : null;
+      const u = localStorage.getItem('user');
+      return u ? JSON.parse(u) : null;
     }
 
-    // ── Guard: redirect to login if not logged in ──
     function requireAuth() {
       if (!localStorage.getItem('token')) {
         window.location.href = 'login.html';
       }
     }
 
-    // ── Guard: redirect if not Admin ──────────────
     function requireAdmin() {
       const user = getCurrentUser();
       if (!user || user.role !== 'admin') {
@@ -26,66 +22,57 @@
       }
     }
 
-    // ── Render the shared navbar ───────────────────
-    
-function renderNavbar(activePage) {
-  const user = getCurrentUser();
-  if (!user) return;
+    function getInitials(name) {
+      return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
+    }
 
-  // Build nav links based on role
-  let adminLink = '';
+    function getRoleBadge(role) {
+      const labels = {
+        'admin': 'Admin',
+        'project_manager': 'Project Manager',
+        'collaborator': 'Collaborator'
+      };
+      return labels[role] || role;
+    }
 
-  if (user.role === 'admin') {
-    adminLink = '<a href="users.html">Users</a>';
-  }
+    function renderSidebar(activePage) {
+      const user = getCurrentUser();
+      if (!user) return;
 
-  const navbar = `
-    <nav class="navbar">
-      <span class="logo">TMS</span>
-      <div class="nav-links">
-        <a href="dashboard.html">Dashboard</a>
-        <a href="tasks.html">Tasks</a>
-        ${adminLink}
-      </div>
-      
-    <div style="display:flex; align-items:center; gap:12px;">
+      const adminLink = user.role === 'admin' ? `
+        <a href="users.html" class="sidebar-link ${activePage==='users'?'active':''}">
+          <span class="nav-icon"><i class="bi bi-people"></i></span>
+          User Management
+        </a>
+      ` : '';
 
-  <div style="position:relative; cursor:pointer;"
-       onclick="toggleNotifications()">
-    🔔
-    <span id="notifBadge" style="
-      position:absolute;
-      top:-6px;
-      right:-8px;
-      background:#e53e3e;
-      color:white;
-      border-radius:50%;
-      width:18px;
-      height:18px;
-      font-size:11px;
-      display:none;
-      align-items:center;
-      justify-content:center;">
-      0
-    </span>
-  </div>
+      const sidebar = `
+        <aside class="sidebar" id="sidebar">
+          <div class="sidebar-logo">
+            <div class="sidebar-logo-icon">
+              <i class="bi bi-kanban"></i>
+            </div>
+            <div>
+              <div class="sidebar-logo-text">TaskFlow</div>
+              <div class="sidebar-logo-sub">INTE 21323</div>
+            </div>
+          </div>
 
-  <span class="user-info">${user.name} (${user.role})</span>
+          <nav class="sidebar-nav">
+            <div class="sidebar-section-label">Main Menu</div>
 
-  <button class="btn btn-secondary btn-sm"
-          onclick="logout()">Logout</button>
+            <a href="dashboard.html" class="sidebar-link ${activePage==='dashboard'?'active':''}">
+              <span class="nav-icon"><i class="bi bi-grid-1x2"></i></span>
+              Dashboard
+            </a>
 
-</div>  
-    </nav>
-  `;
+            <a href="tasks.html" class="sidebar-link ${activePage==='tasks'?'active':''}">
+              <span class="nav-icon"><i class="bi bi-check2-square"></i></span>
+              Tasks
+            </a>
 
-  // Insert navbar at the top of the body
-  document.body.insertAdjacentHTML('afterbegin', navbar);
-}
+            ${adminLink}
 
-<<<<<<< Updated upstream
-    
-=======
             <div class="sidebar-section-label" style="margin-top:16px;">Account</div>
 
             <a href="#" class="sidebar-link" onclick="logout()">
@@ -154,6 +141,7 @@ function renderNavbar(activePage) {
         setTimeout(() => toast.remove(), 300);
       }, 4000);
     }
+
 
     // ── NOTIFICATION PANEL ────────────────────────────────
 function renderNotificationPanel() {
@@ -311,4 +299,4 @@ document.addEventListener('DOMContentLoaded', () => {
   renderNotificationPanel();
   renderConfirmDialog();
 });
->>>>>>> Stashed changes
+
