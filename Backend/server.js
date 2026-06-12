@@ -33,8 +33,24 @@ app.use(helmet());
 // Allow requests from your frontend
 app.use(cors());
 
+<<<<<<< Updated upstream
 // Parse incoming JSON request bodies
 app.use(express.json());
+=======
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'http://127.0.0.1:5500'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+};
+app.use(cors(corsOptions));
+
+app.use(express.json({ limit: '10kb' }));
+app.use(hpp());
+>>>>>>> Stashed changes
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -83,10 +99,20 @@ sequelize.authenticate()
   .then(() => {
     console.log('Database connected successfully.');
     server.listen(PORT, () => {
+<<<<<<< Updated upstream
       console.log('Server is running on port ' + PORT);
+=======
+      console.log('Server running on port ' + PORT);
+      console.log('Security: Helmet, CORS, HPP, Morgan active');
+>>>>>>> Stashed changes
     });
   })
   .catch(err => {
-    console.error('Could not connect to database:', err);
+    console.error('Database connection failed:', err);
   });
+<<<<<<< Updated upstream
   module.exports = { io };
+=======
+
+module.exports = { io };
+>>>>>>> Stashed changes

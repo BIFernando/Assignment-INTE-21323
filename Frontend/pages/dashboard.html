@@ -53,6 +53,31 @@
           </table>
         </div>
 
+<<<<<<< Updated upstream
+=======
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Dashboard</div>
+      <div class="topbar-subtitle">Overview of your tasks</div>
+    </div>
+
+    <div class="topbar-actions">
+      <button class="notif-btn" id="notifBtn">
+        <i class="bi bi-bell"></i>
+        <span class="notif-badge" id="notifBadge"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="stat-grid">
+
+    <div class="stat-card">
+      <div class="stat-icon indigo">
+        <i class="bi bi-list-check" style="color:var(--primary);"></i>
+>>>>>>> Stashed changes
       </div>
 
       <script src="../js/api.js"></script>
@@ -104,9 +129,57 @@
               </tr>
             `).join('');
 
+<<<<<<< Updated upstream
           } catch (err) {
             console.error('Dashboard load error:', err);
           }
+=======
+        <tbody id="recentTasksBody">
+          <tr>
+            <td colspan="4">Loading...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+
+  </div>
+
+  <script src="../js/api.js"></script>
+
+  <script src="../js/auth.js"></script>
+
+  <script src="../js/socket.js"></script>
+
+  <script>
+    requireAuth();
+    renderSidebar('dashboard');
+
+    async function loadDashboard() {
+      try {
+        const tasks = await taskAPI.getAll();
+
+        const total = tasks.length;
+        const todo = tasks.filter(t => t.status === 'TODO').length;
+        const inProgress = tasks.filter(t => t.status === 'IN_PROGRESS').length;
+        const done = tasks.filter(t => t.status === 'COMPLETED').length;
+
+        document.getElementById('countTotal').textContent = total;
+        document.getElementById('countTodo').textContent = todo;
+        document.getElementById('countInProgress').textContent = inProgress;
+        document.getElementById('countDone').textContent = done;
+
+        const recent = tasks.slice(0, 5);
+        const tbody = document.getElementById('recentTasksBody');
+
+        if (recent.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="4">No tasks yet.</td></tr>';
+          return;
+>>>>>>> Stashed changes
         }
 
         loadDashboard();

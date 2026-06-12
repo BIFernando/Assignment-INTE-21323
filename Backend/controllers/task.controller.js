@@ -2,6 +2,16 @@ const { Task, User, TaskAssignment } = require('../models/index');
 const { Op } = require('sequelize');
 const { createNotification } = require('../services/notification.service');
 
+// Simple XSS sanitiser
+function sanitize(str) {
+  if (typeof str !== 'string') return str;
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
 // ── CREATE TASK ────────────────────────────────────────
 const createTask = async (req, res) => {
   try {
@@ -21,13 +31,13 @@ const createTask = async (req, res) => {
     }
 
     const task = await Task.create({
-      title,
-      description,
-      priority: priority || 'MEDIUM',
-      status: status || 'TODO',
-      dueDate: dueDate || null,
-      createdById: req.user.id,
-    });
+  title:       sanitize(title),
+  description: sanitize(description),
+  priority:    priority || 'MEDIUM',
+  status:      status   || 'TODO',
+  dueDate:     dueDate  || null,
+  createdById: req.user.id,
+});
 
     if (assigneeIds && assigneeIds.length > 0) {
       const assignments = assigneeIds.map(userId => ({

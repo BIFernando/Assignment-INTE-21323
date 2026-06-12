@@ -1,6 +1,7 @@
-    requireAuth();
+document.addEventListener('DOMContentLoaded', () => {
+      requireAuth();
     requireAdmin(); // redirect non-admins away
-    renderNavbar('users');
+    renderSidebar('users');
 
     async function loadUsers() {
       try {
@@ -44,15 +45,20 @@
     }
 
     async function deactivateUser(id, name) {
-      if (!confirm('Deactivate ' + name + '? They will lose access.')) return;
-      try {
-        await userAPI.deactivate(id);
-        showSuccess('User deactivated successfully.');
-        loadUsers();
-      } catch (err) {
-        showError(err.message);
-      }
-    }
+  const ok = await appConfirm(
+    'Deactivate ' + name + '?',
+    'They will lose access to the system immediately.',
+    'Deactivate'
+  );
+  if (!ok) return;
+  try {
+    await userAPI.deactivate(id);
+    showToast('Success', 'User deactivated successfully.', 'success');
+    loadUsers();
+  } catch (err) {
+    showToast('Error', err.message, 'error');
+  }
+}
 
     // Create user modal
     document.getElementById('createUserBtn')
@@ -107,3 +113,4 @@
     }
 
     loadUsers();
+  });
