@@ -23,51 +23,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-<<<<<<< Updated upstream
-    // ── Load Tasks ─────────────────────────────────
-    async function loadTasks() {
-      const status   = document.getElementById('filterStatus').value;
-      const priority = document.getElementById('filterPriority').value;
-      const filters  = {};
-      if (status)   filters.status   = status;
-      if (priority) filters.priority = priority;
-
-      try {
-        allTasks = await taskAPI.getAll(filters);
-        isKanban ? renderKanban() : renderList();
-      } catch (err) {
-        document.getElementById('pageError').textContent = err.message;
-        document.getElementById('pageError').classList.add('show');
-      }
-    }
-
-    // ── Render List View ───────────────────────────
-    function renderList() {
-      const tbody = document.getElementById('taskTableBody');
-      if (allTasks.length === 0) {
-  tbody.innerHTML = `
-    <tr>
-      <td colspan="6">
-        <div class="empty-state">
-          <div class="empty-icon">📋</div>
-          <div class="empty-title">No tasks found</div>
-          <div class="empty-desc">
-            Tasks you create will appear here.
-          </div>
-        </div>
-      </td>
-    </tr>
-  `;
-  return;
-}
-      tbody.innerHTML = allTasks.map(task => `
-=======
   // ── Render List View ───────────────────────────
   function renderList() {
     const tbody = document.getElementById('taskTableBody');
     if (allTasks.length === 0) {
       tbody.innerHTML = `
->>>>>>> Stashed changes
         <tr>
           <td colspan="6">
             <div class="empty-state">
@@ -116,112 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderKanban() {
     const statuses = ['TODO', 'IN_PROGRESS', 'COMPLETED'];
 
-<<<<<<< Updated upstream
-        counter.textContent = cards.length;
-        if (cards.length === 0) {
-  container.innerHTML = `
-    <div style="text-align:center; padding:30px 16px; color:var(--text-muted);">
-      <i class="bi bi-inbox" style="font-size:28px; opacity:0.3;"></i>
-      <div style="font-size:13px; margin-top:8px;">
-        No tasks here
-      </div>
-    </div>
-  `;
-  return;
-}
-
-      container.innerHTML = cards.map(task => `
-
-  <div class="kanban-card priority-${task.priority.toLowerCase()}"
-       data-id="${task.id}"
-       onclick="window.location.href='task-detail.html?id=${task.id}'">
-
-
-<div class="kanban-card-title">
-  ${DOMPurify.sanitize(task.title)}
-</div>
-
-<div class="kanban-card-meta">
-  <span class="badge badge-${task.priority.toLowerCase()}">
-    ${task.priority}
-  </span>
-
-  ${task.dueDate ? `
-    <span class="kanban-card-date">
-      <i class="bi bi-calendar3"></i>
-      ${new Date(task.dueDate).toLocaleDateString()}
-    </span>
-  ` : ''}
-</div>
-
-  </div>
-`).join('');
-
-      });
-
-      // Enable drag and drop between columns using SortableJS
-      statuses.forEach(status => {
-        new Sortable(document.getElementById('cards-' + status), {
-          group: 'tasks',       // same group = cards can move between columns
-          animation: 150,
-          ghostClass: 'dragging',
-          onEnd: async (evt) => {
-            const taskId   = evt.item.dataset.id;
-            const newStatus = evt.to.id.replace('cards-', '');
-            try {
-              await taskAPI.update(taskId, { status: newStatus });
-            } catch (err) {
-              alert('Could not update task status: ' + err.message);
-              loadTasks(); // reload to revert if update failed
-            }
-          }
-        });
-      });
-    }
-
-    // ── Toggle Between List and Kanban ─────────────
-    document.getElementById('toggleView')
-      .addEventListener('click', () => {
-      isKanban = !isKanban;
-      document.getElementById('listView').style.display =
-        isKanban ? 'none' : 'block';
-      document.getElementById('kanbanView').style.display =
-        isKanban ? 'block' : 'none';
-      document.getElementById('toggleView').textContent =
-        isKanban ? 'Switch to List' : 'Switch to Kanban';
-      renderKanban();
-    });
-
-    // ── Filters ────────────────────────────────────
-    document.getElementById('filterStatus')
-      .addEventListener('change', loadTasks);
-    document.getElementById('filterPriority')
-      .addEventListener('change', loadTasks);
-
-    // ── Create Task Modal ──────────────────────────
-    document.getElementById('createTaskBtn')
-      .addEventListener('click', () => {
-      document.getElementById('createModal').classList.add('show');
-    });
-
-    document.getElementById('closeModal')
-      .addEventListener('click', () => {
-      document.getElementById('createModal').classList.remove('show');
-    });
-
-    document.getElementById('saveTaskBtn')
-      .addEventListener('click', async () => {
-      const title   = document.getElementById('taskTitle').value.trim();
-      const desc    = document.getElementById('taskDesc').value.trim();
-      const priority = document.getElementById('taskPriority').value;
-      const dueDate = document.getElementById('taskDueDate').value;
-
-      document.getElementById('titleError').classList.remove('show');
-      document.getElementById('modalError').classList.remove('show');
-
-      if (!title) {
-        document.getElementById('titleError').classList.add('show');
-=======
     statuses.forEach(status => {
       const cards     = allTasks.filter(t => t.status === status);
       const container = document.getElementById('cards-' + status);
@@ -235,7 +89,6 @@ document.addEventListener('DOMContentLoaded', () => {
             <i class="bi bi-inbox" style="font-size:28px; opacity:0.3;"></i>
             <div style="font-size:13px; margin-top:8px;">No tasks here</div>
           </div>`;
->>>>>>> Stashed changes
         return;
       }
 
@@ -329,17 +182,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Delete Task ────────────────────────────────
   window.deleteTask = async function(id) {
     const ok = await appConfirm(
-    'Delete Task?',
-    'This action cannot be undone.',
-    'Delete'
-  );
-  if (!ok) return;
-  try {
-    await taskAPI.delete(id);
-    loadTasks();
-  } catch (err) {
-    showToast('Error', err.message, 'error');
-  }
+      'Delete Task?',
+      'This action cannot be undone.',
+      'Delete'
+    );
+    if (!ok) return;
+    try {
+      await taskAPI.delete(id);
+      loadTasks();
+    } catch (err) {
+      showToast('Error', err.message, 'error');
+    }
   };
 
   loadTasks();
