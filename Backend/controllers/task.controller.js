@@ -36,7 +36,8 @@ const createTask = async (req, res) => {
   priority:    priority || 'MEDIUM',
   status:      status   || 'TODO',
   dueDate:     dueDate  || null,
-  createdById: req.user.id,
+  projectId: req.body.projectId,   
+  createdBy: req.user.id,
 });
 
     if (assigneeIds && assigneeIds.length > 0) {
@@ -74,6 +75,10 @@ const getAllTasks = async (req, res) => {
     const where = {};
     if (status) where.status = status;
     if (priority) where.priority = priority;
+    if (req.query.projectId) {
+  where.projectId = req.query.projectId;
+}
+
 
     const tasks = await Task.findAll({
       where,
@@ -142,7 +147,7 @@ const updateTask = async (req, res) => {
       return res.status(404).json({ error: 'Task not found.' });
     }
 
-    if (req.user.role === 'COLLABORATOR') {
+    if (req.user.role === 'collaborator') {
       if (!status) {
         return res.status(400).json({ error: 'Collaborators can only update task status.' });
       }

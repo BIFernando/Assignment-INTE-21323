@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const { verifyToken, authorizeRoles } = require('../middleware/auth.middleware');
-const { createUser, getAllUsers, updateUser, deactivateUser } = require('../controllers/user.controller');
+const { createUser, getAllUsers, updateUser, deactivateUser,searchUsers} = require('../controllers/user.controller');
 
 // Validation rules for creating a user
 const createUserValidation = [
@@ -53,8 +53,21 @@ const validate = (req, res, next) => {
   next();
 };
 
-// Apply authentication and authorization to all routes
-router.use(verifyToken, authorizeRoles('admin'));
+ // GET all users — global admin only
+  router.get('/', verifyToken, authorizeRoles('admin'), getAllUsers);
+ 
+  // GET user by email search — any logged in user (for inviting)
+  router.get('/search', verifyToken, searchUsers);
+ 
+  // POST create user — global admin only
+  router.post('/', verifyToken, authorizeRoles('admin'), createUserValidation, validate, createUser);
+ 
+  // PUT update user — global admin only
+  router.put('/:id', verifyToken, authorizeRoles('admin'), updateUserValidation, validate, updateUser);
+ 
+  // PATCH deactivate — global admin only
+  router.patch('/:id/deactivate', verifyToken, authorizeRoles('admin'), deactivateUser);
+ 
 
 // Routes with validation
 router.post('/', createUserValidation, validate, createUser);

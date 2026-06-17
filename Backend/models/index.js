@@ -1,25 +1,24 @@
-const sequelize = require('../config/database');
-const User = require('./User');
-const Task = require('./Task');
+const sequelize     = require('../config/database');
+const User          = require('./User');
+const Task          = require('./Task');
 const TaskAssignment = require('./TaskAssignment');
-const Comment = require('./Comment');
-const Attachment = require('./Attachment');
-const Notification = require('./Notification');
+const Comment       = require('./Comment');
+const Attachment    = require('./Attachment');
+const Notification  = require('./Notification');
+const Project       = require('./Project');
+const ProjectMember = require('./ProjectMember');
 
-// Associations
+// ── User ↔ Task ───────────────────────────────────────────
+User.hasMany(Task, { foreignKey: 'createdBy', as: 'createdTasks' });
+Task.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
 
-// Task creator
-User.hasMany(Task, {
-  foreignKey: 'createdById',
-  as: 'createdTasks'
+// ── User ↔ Task (many-to-many via TaskAssignment) ─────────
+User.belongsToMany(Task, {
+  through: TaskAssignment,
+  as: 'assignedTasks',
+  foreignKey: 'userId',
+  otherKey: 'taskId'
 });
-
-Task.belongsTo(User, {
-  foreignKey: 'createdById',
-  as: 'creator'
-});
-
-// Task assignments
 Task.belongsToMany(User, {
   through: TaskAssignment,
   as: 'assignees',
@@ -27,47 +26,34 @@ Task.belongsToMany(User, {
   otherKey: 'userId'
 });
 
-User.belongsToMany(Task, {
-  through: TaskAssignment,
-  as: 'assignedTasks',
-  foreignKey: 'userId',
-  otherKey: 'taskId'
-});
+// ── Task ↔ Comment ────────────────────────────────────────
+Task.hasMany(Comment,    { foreignKey: 'taskId', as: 'comments' });
+Comment.belongsTo(Task,  { foreignKey: 'taskId' });
+Comment.belongsTo(User,  { foreignKey: 'userId', as: 'author' });
+User.hasMany(Comment,    { foreignKey: 'userId', as: 'comments' });
 
-// Comments
-Task.hasMany(Comment, {
-  foreignKey: 'taskId'
-});
+// ── Task ↔ Attachment ─────────────────────────────────────
+Task.hasMany(Attachment,      { foreignKey: 'taskId',     as: 'attachments' });
+Attachment.belongsTo(Task,    { foreignKey: 'taskId' });
+Attachment.belongsTo(User,    { foreignKey: 'uploadedBy', as: 'uploader' });
 
-Comment.belongsTo(Task, {
-  foreignKey: 'taskId'
-});
+// ── User ↔ Notification ───────────────────────────────────
+User.hasMany(Notification,    { foreignKey: 'userId',        as: 'notifications' });
+Notification.belongsTo(User,  { foreignKey: 'userId' });
+Notification.belongsTo(Task,  { foreignKey: 'relatedTaskId', as: 'relatedTask' });
 
-Comment.belongsTo(User, {
-  foreignKey: 'userId'
-});
+// ── Project ───────────────────────────────────────────────
+Project.belongsTo(User,         { foreignKey: 'createdById', as: 'creator' });
+Project.hasMany(ProjectMember,  { foreignKey: 'projectId',   as: 'members' });
+Project.hasMany(Task,           { foreignKey: 'projectId',   as: 'tasks' });
 
-// Attachments
-Task.hasMany(Attachment, {
-  foreignKey: 'taskId'
-});
+// ── ProjectMember ─────────────────────────────────────────
+ProjectMember.belongsTo(Project, { foreignKey: 'projectId' });
+ProjectMember.belongsTo(User,    { foreignKey: 'userId', as: 'user' });
+User.hasMany(ProjectMember,      { foreignKey: 'userId', as: 'projectMemberships' });
 
-Attachment.belongsTo(Task, {
-  foreignKey: 'taskId'
-});
-
-Attachment.belongsTo(User, {
-  foreignKey: 'uploadedBy'
-});
-
-// Notifications
-User.hasMany(Notification, {
-  foreignKey: 'userId'
-});
-
-Notification.belongsTo(User, {
-  foreignKey: 'userId'
-});
+// ── Task ↔ Project ────────────────────────────────────────
+Task.belongsTo(Project, { foreignKey: 'projectId', as: 'project' });
 
 module.exports = {
   sequelize,
@@ -76,5 +62,7 @@ module.exports = {
   TaskAssignment,
   Comment,
   Attachment,
-  Notification
+  Notification,
+  Project,
+  ProjectMember
 };

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register — TaskFlow TMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css">
+</head>
+<body class="auth-page">
+
+  <div class="auth-container">
+    <div class="auth-card">
+
+      <div class="auth-logo">
+        <div class="sidebar-logo-icon">
+          <i class="bi bi-kanban"></i>
+        </div>
+        <div class="auth-logo-text">TaskFlow</div>
+      </div>
+
+      <h1 class="auth-title">Create your account</h1>
+      <p class="auth-subtitle">Start managing tasks with your team</p>
+
+      <div class="alert error" id="errorAlert"></div>
+
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input type="text" id="name" class="form-control" placeholder="John Smith">
+        <span class="form-error" id="nameError"></span>
+      </div>
+
+      <div class="form-group">
+        <label>Email Address *</label>
+        <input type="email" id="email" class="form-control" placeholder="john@example.com">
+        <span class="form-error" id="emailError"></span>
+      </div>
+
+      <div class="form-group">
+        <label>Password *</label>
+        <input type="password" id="password" class="form-control" placeholder="Min 8 chars, 1 uppercase, 1 number">
+        <span class="form-error" id="passwordError"></span>
+      </div>
+
+      <div class="form-group">
+        <label>Confirm Password *</label>
+        <input type="password" id="confirmPassword" class="form-control" placeholder="Repeat your password">
+        <span class="form-error" id="confirmError"></span>
+      </div>
+
+      <button class="btn btn-primary" id="registerBtn" style="width:100%; margin-top:8px;">
+        Create Account
+      </button>
+
+      <p style="text-align:center; margin-top:16px; font-size:14px; color:var(--text-muted);">
+        Already have an account?
+        <a href="login.html" style="color:var(--primary); font-weight:600;">Sign in</a>
+      </p>
+
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/register.js"></script>
+</body>
+</html>

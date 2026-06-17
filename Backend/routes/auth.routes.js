@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
-const { login, resetPassword } = require('../controllers/auth.controller');
+const { login, resetPassword, register } = require("../controllers/auth.controller");
 const { verifyToken } = require('../middleware/auth.middleware');
 
 // Limit login to 10 attempts per 15 minutes
@@ -11,6 +11,23 @@ const loginLimiter = rateLimit({
   max: 10,
   message: { error: 'Too many login attempts. Please try again later.' }
 });
+
+//validation rules for registration
+const registerValidation = [
+  body("name")
+    .trim()
+    .notEmpty().withMessage("Name is required.")
+    .isLength({ max: 100 }).withMessage("Name too long.")
+    .escape(),
+  body("email")
+    .trim()
+    .isEmail().withMessage("Please provide a valid email.")
+    .normalizeEmail(),
+  body("password")
+    .isLength({ min: 8 }).withMessage("Password must be at least 8 characters.")
+    .matches(/[A-Z]/).withMessage("Password needs an uppercase letter.")
+    .matches(/[0-9]/).withMessage("Password needs a number."),
+];
 
 // Validation rules for login
 const loginValidation = [
@@ -58,5 +75,8 @@ router.post('/login', loginLimiter, loginValidation, validate, login);
 
 // POST /api/auth/reset-password (with validation)
 router.post('/reset-password', verifyToken, resetPasswordValidation, validate, resetPassword);
+
+// POST /api/auth/register
+router.post("/register", registerValidation, validate, register);
 
 module.exports = router;

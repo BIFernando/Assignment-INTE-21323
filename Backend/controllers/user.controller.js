@@ -76,4 +76,28 @@ const deactivateUser = async (req, res) => {
   }
 };
 
-module.exports = { createUser, getAllUsers, updateUser, deactivateUser };
+const searchUsers = async (req, res) => {
+    try {
+      const { email } = req.query;
+ 
+      if (!email) {
+        return res.status(400).json({ message: 'Email query is required.' });
+      }
+ 
+      const user = await User.findOne({
+        where: { email, isActive: true },
+        attributes: ['id', 'name', 'email', 'role']
+      });
+ 
+      if (!user) {
+        return res.status(404).json({ message: 'No user found with that email.' });
+      }
+ 
+      return res.json(user);
+    } catch (err) {
+      console.error('searchUsers error:', err);
+      return res.status(500).json({ message: 'Search failed.' });
+    }
+  };
+  
+module.exports = { createUser, getAllUsers, updateUser, deactivateUser, searchUsers };

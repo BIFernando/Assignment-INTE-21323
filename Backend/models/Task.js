@@ -3,51 +3,41 @@ const sequelize = require('../config/database');
 
 const Task = sequelize.define('Task', {
   id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-    primaryKey: true,
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
   },
-
   title: {
-    type: DataTypes.STRING,
-    allowNull: false,
+    type: DataTypes.STRING(255),
+    allowNull: false
   },
-
-  description: DataTypes.TEXT,
-
-  priority: {
-    type: DataTypes.ENUM('low', 'medium', 'high'),
-    defaultValue: 'medium',
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true
   },
-
+  projectId: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  createdBy: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
   status: {
-    type: DataTypes.ENUM('todo', 'in_progress', 'completed'),
-    defaultValue: 'todo',
+    type: DataTypes.ENUM('TODO', 'IN_PROGRESS', 'COMPLETED'),
+    defaultValue: 'TODO'
   },
-
+  priority: {
+    type: DataTypes.ENUM('LOW', 'MEDIUM', 'HIGH'),
+    defaultValue: 'MEDIUM'
+  },
   dueDate: {
-    type: DataTypes.DATE,
-    allowNull: true,
-  },
-
-  createdById: {
-    type: DataTypes.UUID,
-    allowNull: false,
-  },
-
-  createdAt: {
-    type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW,
-  },
-
-  updatedAt: {
-    type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW,
-  },
-
+    type: DataTypes.DATEONLY,
+    allowNull: true
+  }
 }, {
-  tableName: 'Tasks',
-  timestamps: true,
+  tableName: 'Task',
+  timestamps: true
 });
 
 module.exports = Task;

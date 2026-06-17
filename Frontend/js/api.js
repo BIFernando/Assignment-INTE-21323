@@ -25,6 +25,13 @@
 
     // ── AUTH ───────────────────────────────────────
     const authAPI = {
+        register: (name, email, password) =>
+    fetch(API_BASE + "/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password }),
+    }).then(handleResponse),
+
       login: (email, password) =>
         fetch(API_BASE + '/auth/login', {
           method: 'POST',
@@ -66,7 +73,12 @@
           method: 'PATCH',
           headers: authHeaders(),
         }).then(handleResponse),
-    };
+
+       searchByEmail: (email) =>
+      fetch(API_BASE + '/users/search?email=' + encodeURIComponent(email), {
+        headers: authHeaders()
+      }).then(handleResponse),
+  };
 
     // ── TASKS ──────────────────────────────────────
     const taskAPI = {
@@ -152,3 +164,49 @@
       headers: authHeaders(),
     }).then(handleResponse),
 };
+
+const projectAPI = {
+  getAll: () =>
+    fetch(API_BASE + "/projects", {
+      headers: authHeaders()
+    }).then(handleResponse),
+
+  create: (data) =>
+    fetch(API_BASE + "/projects", {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify(data),
+    }).then(handleResponse),
+
+  getById: (id) =>
+    fetch(API_BASE + "/projects/" + id, {
+      headers: authHeaders()
+    }).then(handleResponse),
+
+  invite: (projectId, email, role) =>
+    fetch(API_BASE + "/projects/" + projectId + "/members", {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ email, role }),
+    }).then(handleResponse),
+
+  removeMember: (projectId, userId) =>
+    fetch(API_BASE + "/projects/" + projectId + "/members/" + userId, {
+      method: "DELETE",
+      headers: authHeaders(),
+    }).then(handleResponse),
+
+    updateMemberRole: (projectId, userId, role) =>
+      fetch(API_BASE + '/projects/' + projectId + '/members/' + userId, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ role }),
+      }).then(handleResponse),
+ 
+    removeMember: (projectId, userId) =>
+      fetch(API_BASE + '/projects/' + projectId + '/members/' + userId, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      }).then(handleResponse),
+  };
+
