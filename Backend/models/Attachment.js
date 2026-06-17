@@ -3,16 +3,16 @@ const sequelize = require('../config/database');
 
 const Attachment = sequelize.define('Attachment', {
   id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
     primaryKey: true,
   },
   taskId: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     allowNull: false,
   },
   uploadedBy: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     allowNull: false,
   },
   fileName: {
@@ -25,6 +25,7 @@ const Attachment = sequelize.define('Attachment', {
   },
 }, {
   timestamps: true,
+  tableName: 'Attachment'
 });
 
 module.exports = Attachment;

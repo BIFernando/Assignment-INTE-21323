@@ -2,15 +2,48 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const User = sequelize.define('User', {
-  id:           { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-  name:         { type: DataTypes.STRING, allowNull: false },
-  email:        { type: DataTypes.STRING, allowNull: false, unique: true },
-  passwordHash: { type: DataTypes.STRING, allowNull: false },
-  role:         { type: DataTypes.ENUM('admin', 'project_manager', 'collaborator'), defaultValue: 'collaborator' },
-  isFirstLogin: { type: DataTypes.BOOLEAN, defaultValue: true },
-  isActive:     { type: DataTypes.BOOLEAN, defaultValue: true },
+  id: {
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
+    primaryKey: true
+  },
+  name: {
+    type: DataTypes.STRING(100),
+    allowNull: false
+  },
+  email: {
+    type: DataTypes.STRING(100),
+    allowNull: false,
+    unique: true
+  },
+  passwordHash: {
+    type: DataTypes.STRING(255),
+    allowNull: false
+  },
+  role: {
+    type: DataTypes.ENUM('admin', 'project_manager', 'collaborator'),
+    allowNull: true,
+    defaultValue: null
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
+  },
+  isFirstLogin: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
+  },
+  inviteToken: {
+    type: DataTypes.STRING(255),
+    allowNull: true
+  },
+  inviteExpiry: {
+    type: DataTypes.DATE,
+    allowNull: true
+  }
 }, {
-  timestamps: true,
+  tableName: 'User',   // ← must match your DB exactly
+  timestamps: true
 });
 
 module.exports = User;

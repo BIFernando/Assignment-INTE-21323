@@ -3,16 +3,16 @@ const sequelize = require('../config/database');
 
 const Comment = sequelize.define('Comment', {
   id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
+    type: DataTypes.INTEGER,
+    autoIncrement: true,
     primaryKey: true,
   },
   taskId: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     allowNull: false,
   },
   userId: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER,
     allowNull: false,
   },
   content: {
@@ -21,6 +21,7 @@ const Comment = sequelize.define('Comment', {
   },
 }, {
   timestamps: true,
+  tableName: 'Comment'
 });
 
 module.exports = Comment;

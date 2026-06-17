@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project — TaskFlow TMS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="../css/main.css">
+  </head>
+  <body>
+ 
+    <!-- Invite Member Modal -->
+    <div class="modal-overlay" id="inviteModal">
+      <div class="modal">
+        <div class="modal-header">
+          <span class="modal-title">Invite Member</span>
+          <span class="modal-close" id="closeInviteModal">&times;</span>
+        </div>
+        <div class="alert error" id="inviteError"></div>
+        <div class="alert success" id="inviteSuccess"></div>
+        <div class="form-group">
+          <label>Email Address *</label>
+          <input type="email" id="inviteEmail" class="form-control"
+                 placeholder="member@example.com">
+          <span style="font-size:12px; color:var(--text-muted);">
+            The user must already have an account.
+          </span>
+        </div>
+        <div class="form-group">
+          <label>Role *</label>
+          <select id="inviteRole" class="form-control">
+            <option value="collaborator">Collaborator</option>
+            <option value="project_manager">Project Manager</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" id="sendInviteBtn" style="width:100%;">
+          Add Member
+        </button>
+      </div>
+    </div>
+ 
+    <div class="app-layout">
+      <div class="main-content">
+ 
+        <!-- Topbar -->
+        <div class="topbar">
+          <div>
+            <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">
+              <a href="projects.html"
+                 style="color:var(--primary); text-decoration:none;">
+                ← Back to Projects
+              </a>
+            </div>
+            <div class="topbar-title" id="projectName">Loading...</div>
+            <div class="topbar-subtitle" id="projectDesc"></div>
+          </div>
+ 
+          <div class="topbar-actions">
+            <button class="notif-btn" id="notifBtn">
+              <i class="bi bi-bell"></i>
+              <span class="notif-badge" id="notifBadge"></span>
+            </button>
+            <button class="btn btn-secondary" id="viewTasksBtn">
+              <i class="bi bi-check2-square"></i> View Tasks
+            </button>
+            <button class="btn btn-primary" id="inviteMemberBtn"
+                    style="display:none;">
+              + Invite Member
+            </button>
+          </div>
+        </div>
+ 
+        <div class="alert error" id="pageError"></div>
+ 
+        <!-- Members Section -->
+        <div class="card">
+          <div class="section-header">
+            <div class="section-title">
+              <i class="bi bi-people"></i> Project Members
+            </div>
+          </div>
+ 
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th id="actionsHeader" style="display:none;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="membersTableBody">
+              <tr><td colspan="4">Loading members...</td></tr>
+            </tbody>
+          </table>
+        </div>
+ 
+      </div>
+    </div>
+ 
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/socket.js"></script>
+    <script src="../js/project-detail.js"></script>
+  </body>
+  </html>
+ 

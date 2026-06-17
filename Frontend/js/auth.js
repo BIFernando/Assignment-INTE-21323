@@ -1,52 +1,52 @@
 function logout() {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = 'login.html';
-    }
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  window.location.href = 'login.html';
+}
 
-    function getCurrentUser() {
-      const u = localStorage.getItem('user');
-      return u ? JSON.parse(u) : null;
-    }
+function getCurrentUser() {
+  const u = localStorage.getItem('user');
+  return u ? JSON.parse(u) : null;
+}
 
-    function requireAuth() {
-      if (!localStorage.getItem('token')) {
-        window.location.href = 'login.html';
-      }
-    }
+function requireAuth() {
+  if (!localStorage.getItem('token')) {
+    window.location.href = 'login.html';
+  }
+}
 
-    function requireAdmin() {
-      const user = getCurrentUser();
-      if (!user || user.role !== 'admin') {
-        window.location.href = 'dashboard.html';
-      }
-    }
+function requireAdmin() {
+  const user = getCurrentUser();
+  if (!user || user.role !== 'admin') {
+    window.location.href = 'dashboard.html';
+  }
+}
 
-    function getInitials(name) {
-      return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
-    }
+function getInitials(name) {
+  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+}
 
-    function getRoleBadge(role) {
-      const labels = {
-        'admin': 'Admin',
-        'project_manager': 'Project Manager',
-        'collaborator': 'Collaborator'
-      };
-      return labels[role] || role;
-    }
+function getRoleBadge(role) {
+  const labels = {
+    'admin': 'Admin',
+    'project_manager': 'Project Manager',
+    'collaborator': 'Collaborator'
+  };
+  return labels[role] || role;
+}
 
-    function renderSidebar(activePage) {
-      const user = getCurrentUser();
-      if (!user) return;
+function renderSidebar(activePage) {
+  const user = getCurrentUser();
+  if (!user) return;
 
-      const adminLink = user.role === 'admin' ? `
-        <a href="users.html" class="sidebar-link ${activePage==='users'?'active':''}">
+  const adminLink = user.role === 'admin' ? `
+        <a href="users.html" class="sidebar-link ${activePage === 'users' ? 'active' : ''}">
           <span class="nav-icon"><i class="bi bi-people"></i></span>
           User Management
         </a>
       ` : '';
 
-      const sidebar = `
+  const sidebar = `
         <aside class="sidebar" id="sidebar">
           <div class="sidebar-logo">
             <div class="sidebar-logo-icon">
@@ -61,14 +61,14 @@ function logout() {
           <nav class="sidebar-nav">
             <div class="sidebar-section-label">Main Menu</div>
 
-            <a href="dashboard.html" class="sidebar-link ${activePage==='dashboard'?'active':''}">
+            <a href="dashboard.html" class="sidebar-link ${activePage === 'dashboard' ? 'active' : ''}">
               <span class="nav-icon"><i class="bi bi-grid-1x2"></i></span>
               Dashboard
             </a>
 
-            <a href="tasks.html" class="sidebar-link ${activePage==='tasks'?'active':''}">
-              <span class="nav-icon"><i class="bi bi-check2-square"></i></span>
-              Tasks
+            <a href="projects.html" class="sidebar-link ${activePage === 'projects' ? 'active' : ''}">
+              <span class="nav-icon"><i class="bi bi-folder"></i></span>
+              Projects
             </a>
 
             ${adminLink}
@@ -94,37 +94,37 @@ function logout() {
         </aside>
       `;
 
-      document.body.insertAdjacentHTML('afterbegin', sidebar);
-    }
+  document.body.insertAdjacentHTML('afterbegin', sidebar);
+}
 
-    // Toast notification system
-    function showToast(title, message, type = 'info') {
-      let container = document.getElementById('toastContainer');
-      if (!container) {
-        container = document.createElement('div');
-        container.id = 'toastContainer';
-        container.className = 'toast-container';
-        document.body.appendChild(container);
-      }
+// Toast notification system
+function showToast(title, message, type = 'info') {
+  let container = document.getElementById('toastContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toastContainer';
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
 
-      const icons = {
-        success: '✅',
-        error:   '❌',
-        warning: '⚠️',
-        info:    '🔔'
-      };
+  const icons = {
+    success: '✅',
+    error: '❌',
+    warning: '⚠️',
+    info: '🔔'
+  };
 
-      const colors = {
-        success: 'var(--success)',
-        error:   'var(--danger)',
-        warning: 'var(--warning)',
-        info:    'var(--primary)'
-      };
+  const colors = {
+    success: 'var(--success)',
+    error: 'var(--danger)',
+    warning: 'var(--warning)',
+    info: 'var(--primary)'
+  };
 
-      const toast = document.createElement('div');
-      toast.className = 'toast';
-      toast.style.borderLeftColor = colors[type] || colors.info;
-      toast.innerHTML = `
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.style.borderLeftColor = colors[type] || colors.info;
+  toast.innerHTML = `
         <span class="toast-icon">${icons[type] || icons.info}</span>
         <div>
           <div class="toast-title">${title}</div>
@@ -132,18 +132,18 @@ function logout() {
         </div>
       `;
 
-      container.appendChild(toast);
+  container.appendChild(toast);
 
-      setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateX(100%)';
-        toast.style.transition = 'all 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
-      }, 4000);
-    }
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(100%)';
+    toast.style.transition = 'all 0.3s ease';
+    setTimeout(() => toast.remove(), 300);
+  }, 4000);
+}
 
 
-    // ── NOTIFICATION PANEL ────────────────────────────────
+// ── NOTIFICATION PANEL ────────────────────────────────
 function renderNotificationPanel() {
   const panel = `
     <div class="notif-overlay" id="notifOverlay" onclick="closeNotifPanel()"></div>
@@ -174,9 +174,9 @@ function renderNotificationPanel() {
 }
 
 function toggleNotifPanel() {
-  const panel   = document.getElementById('notifPanel');
+  const panel = document.getElementById('notifPanel');
   const overlay = document.getElementById('notifOverlay');
-  const isOpen  = panel.classList.contains('open');
+  const isOpen = panel.classList.contains('open');
   if (isOpen) {
     closeNotifPanel();
   } else {
@@ -216,7 +216,7 @@ async function loadNotifications() {
 
     // Mark as read when panel opens
     notifications.filter(n => !n.isRead).forEach(n => {
-      notificationAPI.markRead(n.id).catch(() => {});
+      notificationAPI.markRead(n.id).catch(() => { });
     });
 
     // Update badge to 0
@@ -239,7 +239,7 @@ async function markAllRead() {
 
 function timeAgo(dateStr) {
   const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
-  if (diff < 60)   return 'Just now';
+  if (diff < 60) return 'Just now';
   if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
   if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
   return Math.floor(diff / 86400) + 'd ago';
@@ -270,9 +270,9 @@ function renderConfirmDialog() {
 function appConfirm(title, message, okLabel = 'Delete') {
   return new Promise((resolve) => {
     const overlay = document.getElementById('confirmOverlay');
-    document.getElementById('confirmTitle').textContent   = title;
+    document.getElementById('confirmTitle').textContent = title;
     document.getElementById('confirmMessage').textContent = message;
-    document.getElementById('confirmOkBtn').textContent   = okLabel;
+    document.getElementById('confirmOkBtn').textContent = okLabel;
 
     overlay.classList.add('show');
 
@@ -286,7 +286,7 @@ function appConfirm(title, message, okLabel = 'Delete') {
       resolve(result);
     }
 
-    document.getElementById('confirmOkBtn').addEventListener('click',    () => cleanup(true));
+    document.getElementById('confirmOkBtn').addEventListener('click', () => cleanup(true));
     document.getElementById('confirmCancelBtn').addEventListener('click', () => cleanup(false));
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) cleanup(false);

@@ -15,7 +15,7 @@ const authRoutes         = require('./routes/auth.routes');
 const userRoutes         = require('./routes/user.routes');
 const taskRoutes         = require('./routes/task.routes');
 const notificationRoutes = require('./routes/notification.routes');
-//const projectRoutes      = require('./routes/project.routes'); // ← ADD THIS
+const projectRoutes      = require('./routes/Project.routes'); // ← ADD THIS
 
 const app    = express();
 const server = http.createServer(app);
@@ -68,7 +68,7 @@ app.use('/api/auth',          authRoutes);
 app.use('/api/users',         userRoutes);
 app.use('/api/tasks',         taskRoutes);
 app.use('/api/notifications', notificationRoutes);
-//app.use('/api/projects',      projectRoutes); // ← ADD THIS
+app.use('/api/projects',      projectRoutes); 
 
 // ── Health Check ─────────────────────────────────────────
 app.get('/', (req, res) => {

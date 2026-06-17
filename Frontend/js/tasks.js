@@ -1,21 +1,32 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-  requireAuth();
+  requireAuth(); // ← must be FIRST
   renderSidebar('tasks');
 
   const user = getCurrentUser();
+
+  // Get projectId from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const projectId = urlParams.get('projectId');
+
+  // If no projectId, redirect to projects page
+  if (!projectId) {
+    window.location.href = 'projects.html';
+    return;
+  }
+
   let allTasks = [];
   let isKanban = false;
 
-  // Hide create button for Collaborators
-  if (user.role === 'COLLABORATOR') {
+  // Hide create button for collaborators (lowercase to match DB)
+  if (user.role === 'collaborator') {
     document.getElementById('createTaskBtn').style.display = 'none';
   }
 
   // ── Load Tasks ─────────────────────────────────
   async function loadTasks() {
     try {
-      allTasks = await taskAPI.getAll({});
+      allTasks = await taskAPI.getAll({ projectId });
       isKanban ? renderKanban() : renderList();
     } catch (err) {
       document.getElementById('pageError').textContent = err.message;
@@ -63,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
               ? task.assignees.map(a => a.name).join(', ')
               : 'Unassigned'}</td>
         <td>
-          ${user.role !== 'COLLABORATOR' ? `
+          ${user.role !== 'collaborator' ? `
             <button class="btn btn-danger btn-sm"
               onclick="deleteTask('${task.id}')">Delete</button>
           ` : ''}
@@ -123,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
           try {
             await taskAPI.update(taskId, { status: newStatus });
           } catch (err) {
-            alert('Could not update task status: ' + err.message);
+            showToast('Error', 'Could not update task status.', 'error');
             loadTasks();
           }
         }
@@ -131,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ── Toggle View Button ─────────────────────────
+  // ── Toggle View ────────────────────────────────
   const toggleBtn = document.getElementById('toggleView');
   if (toggleBtn) {
     toggleBtn.addEventListener('click', () => {
@@ -167,7 +178,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
-      await taskAPI.create({ title, description: desc, priority, dueDate: dueDate || null });
+      await taskAPI.create({
+        title,
+        description: desc,
+        priority,
+        dueDate:   dueDate || null,
+        projectId            // ← always send projectId with new tasks
+      });
       document.getElementById('createModal').classList.remove('show');
       document.getElementById('taskTitle').value = '';
       document.getElementById('taskDesc').value  = '';

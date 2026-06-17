@@ -250,6 +250,10 @@
             <i class="bi bi-box-arrow-in-right"></i>
             Sign In
           </button>
+          <p style="text-align:center; margin-top:16px; font-size:14px; color:var(--text-muted);">
+  Don't have an account?
+  <a href="register.html" style="color:var(--primary); font-weight:600;">Sign up</a>
+</p>
 
         </div>
       </div>
@@ -290,9 +294,10 @@
             const data = await authAPI.login(email, password);
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
-            window.location.href = data.isFirstLogin
-              ? 'reset-password.html'
-              : 'dashboard.html';
+            // Clear fields
+  document.getElementById('email').value = '';
+  document.getElementById('password').value = '';
+             window.location.href = 'dashboard.html';
           } catch (err) {
             errAlert.innerHTML = '<i class="bi bi-exclamation-circle"></i> ' + err.message;
             errAlert.classList.add('show');

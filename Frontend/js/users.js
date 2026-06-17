@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <td>${u.email}</td>
             <td>
               <span class="badge" style="background:#e9d8fd; color:#553c9a;">
-                ${u.role.replace('_',' ')}
+                ${u.role ? u.role.replace('_', ' ') : 'No role'}
               </span>
             </td>
             <td>
