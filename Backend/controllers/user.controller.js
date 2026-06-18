@@ -22,7 +22,7 @@ const createUser = async (req, res) => {
       isActive: true,
     });
 
-    await sendWelcomeEmail(email, name, tempPassword);
+    //await sendWelcomeEmail(email, name, tempPassword);
 
     res.status(201).json({
       message: 'User created successfully.',
