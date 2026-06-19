@@ -73,7 +73,7 @@
       list.innerHTML = files.map(f => `
         <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
           <span style="font-size:14px;">📎 ${f.fileName}</span>
-          <a href="http://localhost:5000/${f.fileUrl}"
+          <a href="${window.location.protocol}//${window.location.hostname}:5000/${f.fileUrl}"
              target="_blank" class="btn btn-secondary btn-sm">View</a>
         </div>
       `).join('');
