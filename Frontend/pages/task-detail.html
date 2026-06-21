@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Task Detail — TaskFlow TMS</title>
 
-  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -14,76 +12,112 @@
 </head>
 <body>
 
+  <!-- Comments Side Panel -->
+  <div class="notif-overlay" id="commentsOverlay" onclick="closeComments()"></div>
+  <div class="notif-panel" id="commentsPanel">
+    <div class="notif-panel-header">
+      <span class="notif-panel-title">
+        <i class="bi bi-chat-left-text"></i> Comments
+      </span>
+      <button class="notif-close-btn" onclick="closeComments()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <div class="notif-panel-body" id="commentsList">
+      <div class="notif-empty">Loading comments...</div>
+    </div>
+
+    <!-- Add Comment -->
+    <div style="padding:16px; border-top:1px solid var(--border); flex-shrink:0;">
+      <textarea id="commentInput"
+                rows="3"
+                placeholder="Write a comment..."
+                style="width:100%; padding:10px 14px; border:1.5px solid var(--border);
+                       border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif;
+                       font-size:14px; resize:none; outline:none;
+                       background:var(--card); color:var(--text);">
+      </textarea>
+      <button class="btn btn-primary" id="addCommentBtn"
+              style="width:100%; margin-top:8px;">
+        <i class="bi bi-send"></i> Send Comment
+      </button>
+    </div>
+  </div>
+
   <div class="app-layout">
     <div class="main-content">
 
       <!-- Topbar -->
       <div class="topbar">
         <div>
+          <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">
+            <a href="javascript:history.back()"
+               style="color:var(--primary); text-decoration:none;">
+              ← Back
+            </a>
+          </div>
           <div class="topbar-title">Task Details</div>
-          <div class="topbar-subtitle">View and manage task information</div>
         </div>
-
         <div class="topbar-actions">
           <button class="notif-btn" id="notifBtn">
             <i class="bi bi-bell"></i>
             <span class="notif-badge" id="notifBadge"></span>
           </button>
+          <button class="btn btn-secondary" id="commentsBtn">
+            <i class="bi bi-chat-left-text"></i>
+            Comments
+            <span class="notif-badge" id="commentsBadge"
+                  style="position:relative; top:0; right:0; margin-left:4px;
+                         background:var(--primary);">
+            </span>
+          </button>
         </div>
       </div>
 
-      <!-- Back Button -->
-      <div style="margin-bottom:20px;">
-        <a href="tasks.html" class="btn btn-secondary">
-          ← Back to Tasks
-        </a>
-      </div>
+      <div class="alert error" id="pageError"></div>
 
       <!-- Task Info Card -->
-      <div class="card" id="taskCard">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-          <div>
-            <h2 id="taskTitle" style="font-size:22px; margin-bottom:8px;">
+      <div class="card" style="margin-bottom:20px;">
+        <div style="display:flex; justify-content:space-between;
+                    align-items:flex-start; flex-wrap:wrap; gap:12px;">
+          <div style="flex:1;">
+            <h2 id="taskTitle"
+                style="font-size:22px; font-weight:700;
+                       margin-bottom:10px; color:var(--text);">
               Loading...
             </h2>
-            <div id="taskMeta" style="color:#888; font-size:14px;"></div>
+            <div id="taskMeta" style="display:flex; gap:8px;
+                 align-items:center; flex-wrap:wrap; margin-bottom:12px;">
+            </div>
+            <p id="taskDescription"
+               style="color:var(--text-secondary); font-size:14px;
+                      line-height:1.6; margin-bottom:12px;">
+            </p>
+            <div id="taskAssignees"
+                 style="font-size:14px; color:var(--text-secondary);">
+            </div>
           </div>
 
-          <div id="statusSelector"></div>
+          <div id="statusSelector" style="flex-shrink:0;"></div>
         </div>
-
-        <p id="taskDescription" style="margin-top:16px; color:#555;"></p>
-
-        <div id="taskAssignees" style="margin-top:12px; font-size:14px;"></div>
       </div>
 
-      <!-- Comments -->
+      <!-- Attachments Card -->
       <div class="card">
-        <h3 style="margin-bottom:16px;">Comments</h3>
-
-        <div id="commentsList"></div>
-
-        <div class="form-group" style="margin-top:12px;">
-          <textarea id="commentInput"
-                    rows="3"
-                    placeholder="Write a comment..."></textarea>
+        <div class="section-header" style="margin-bottom:16px;">
+          <div class="section-title">
+            <i class="bi bi-paperclip"></i> Attachments
+          </div>
         </div>
 
-        <button class="btn btn-primary btn-sm" id="addCommentBtn">
-          Add Comment
-        </button>
-      </div>
+        <div id="attachmentsList" style="margin-bottom:16px;"></div>
 
-      <!-- Attachments -->
-      <div class="card">
-        <h3 style="margin-bottom:16px;">Attachments</h3>
-
-        <div id="attachmentsList"></div>
-
-        <div style="margin-top:12px;">
-          <input type="file" id="fileInput" style="margin-bottom:8px;">
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <input type="file" id="fileInput"
+                 style="font-size:13px; color:var(--text-secondary);">
           <button class="btn btn-secondary btn-sm" id="uploadBtn">
-            Upload File
+            <i class="bi bi-upload"></i> Upload File
           </button>
         </div>
       </div>
@@ -91,14 +125,11 @@
     </div>
   </div>
 
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script src="../js/api.js"></script>
   <script src="../js/auth.js"></script>
   <script src="../js/socket.js"></script>
   <script src="../js/task-detail.js"></script>
-  <script>
-    requireAuth();
-    renderSidebar('tasks');
-  </script>
 
 </body>
 </html>

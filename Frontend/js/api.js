@@ -108,11 +108,11 @@
           body: JSON.stringify(data),
         }).then(handleResponse),
 
-      delete: (id) =>
-        fetch(API_BASE + '/tasks/' + id, {
-          method: 'DELETE',
-          headers: authHeaders(),
-        }).then(handleResponse),
+      deleteComment: (taskId, commentId) =>
+  fetch(API_BASE + '/tasks/' + taskId + '/comments/' + commentId, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  }).then(handleResponse),
 
       addComment: (taskId, content) =>
         fetch(API_BASE + '/tasks/' + taskId + '/comments', {
