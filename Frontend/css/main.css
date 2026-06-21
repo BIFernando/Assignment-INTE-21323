@@ -1291,4 +1291,7 @@ img { max-width: 100%; }
   color: var(--text-muted);
   margin-bottom: 28px;
 }
+#confirmOverlay {
+  z-index: 3000;
+}
 

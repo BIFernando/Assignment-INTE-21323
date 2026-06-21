@@ -31,9 +31,10 @@ const getComments = async (req, res) => {
     const { taskId } = req.params;
 
     const comments = await Comment.findAll({
-      where: { taskId: taskId },
+      where: { taskId },
       include: [{
         model: User,
+        as: 'author',           // ← add this, matches your association
         attributes: ['id', 'name', 'email'],
       }],
       order: [['createdAt', 'ASC']],
@@ -41,6 +42,7 @@ const getComments = async (req, res) => {
 
     res.status(200).json(comments);
   } catch (err) {
+    console.error('getComments error:', err);
     res.status(500).json({ error: 'Server error.', details: err.message });
   }
 };
@@ -55,7 +57,7 @@ const deleteComment = async (req, res) => {
       return res.status(404).json({ error: 'Comment not found.' });
     }
 
-    if (comment.userId !== req.user.id && req.user.role !== 'ADMIN') {
+    if (comment.userId !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({ error: 'You can only delete your own comments.' });
     }
 

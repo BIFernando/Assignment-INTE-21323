@@ -108,4 +108,6 @@ sequelize.authenticate()
     console.error('Database connection failed:', err);
   });
 
+ 
+
 module.exports = { io };
