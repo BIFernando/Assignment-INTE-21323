@@ -3,28 +3,53 @@ document.addEventListener('DOMContentLoaded', () => {
   requireAuth();
   renderSidebar('dashboard');
 
-  async function loadDashboard() {
+   async function loadDashboard() {
     try {
-      const tasks = await taskAPI.getAll();
-
-      const total      = tasks.length;
-      const todo       = tasks.filter(t => t.status === 'TODO').length;
-      const inProgress = tasks.filter(t => t.status === 'IN_PROGRESS').length;
-      const done       = tasks.filter(t => t.status === 'COMPLETED').length;
-
+      // Get all projects user belongs to
+      const projects = await projectAPI.getAll();
+ 
+      if (projects.length === 0) {
+        // User has no projects yet
+        document.getElementById('countTotal').textContent      = 0;
+        document.getElementById('countTodo').textContent       = 0;
+        document.getElementById('countInProgress').textContent = 0;
+        document.getElementById('countDone').textContent       = 0;
+        document.getElementById('recentTasksBody').innerHTML =
+          '<tr><td colspan="4">No tasks yet. Create a project first.</td></tr>';
+        return;
+      }
+ 
+      // Load tasks from ALL projects the user is in
+      // and combine them
+      let allTasks = [];
+      for (const project of projects) {
+        try {
+          const tasks = await taskAPI.getAll({ projectId: project.id });
+          allTasks = allTasks.concat(tasks);
+        } catch (e) {
+          // skip projects with errors
+        }
+      }
+ 
+      const total      = allTasks.length;
+      const todo       = allTasks.filter(t => t.status === 'TODO').length;
+      const inProgress = allTasks.filter(t => t.status === 'IN_PROGRESS').length;
+      const done       = allTasks.filter(t => t.status === 'COMPLETED').length;
+ 
       document.getElementById('countTotal').textContent      = total;
       document.getElementById('countTodo').textContent       = todo;
       document.getElementById('countInProgress').textContent = inProgress;
       document.getElementById('countDone').textContent       = done;
-
-      const recent = tasks.slice(0, 5);
+ 
+      const recent = allTasks.slice(0, 5);
       const tbody  = document.getElementById('recentTasksBody');
-
+ 
       if (recent.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4">No tasks yet.</td></tr>';
+        tbody.innerHTML =
+          '<tr><td colspan="4">No tasks yet.</td></tr>';
         return;
       }
-
+ 
       tbody.innerHTML = recent.map(task => `
         <tr onclick="window.location.href='task-detail.html?id=${task.id}'"
             style="cursor:pointer;">
@@ -44,12 +69,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 : 'No deadline'}</td>
         </tr>
       `).join('');
-
+ 
     } catch (err) {
       console.error('Dashboard error:', err);
     }
   }
-
+ 
   loadDashboard();
 
 });

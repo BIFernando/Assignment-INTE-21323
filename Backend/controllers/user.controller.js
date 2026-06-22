@@ -99,5 +99,33 @@ const searchUsers = async (req, res) => {
       return res.status(500).json({ message: 'Search failed.' });
     }
   };
+
+  const updateProfile = async (req, res) => {
+    try {
+      const { name } = req.body;
+ 
+      if (!name || name.trim() === '') {
+        return res.status(400).json({ message: 'Name is required.' });
+      }
+ 
+      await User.update(
+        { name: name.trim() },
+        { where: { id: req.user.id } }
+      );
+ 
+      const updatedUser = await User.findByPk(req.user.id, {
+        attributes: ['id', 'name', 'email', 'role', 'createdAt']
+      });
+ 
+      return res.json({
+        message: 'Profile updated successfully.',
+        user: updatedUser
+      });
+    } catch (err) {
+      console.error('updateProfile error:', err);
+      return res.status(500).json({ message: 'Could not update profile.' });
+    }
+  };
+ 
   
-module.exports = { createUser, getAllUsers, updateUser, deactivateUser, searchUsers };
+module.exports = { createUser, getAllUsers, updateUser, deactivateUser, searchUsers, updateProfile };

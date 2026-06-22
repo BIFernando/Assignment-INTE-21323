@@ -1,7 +1,8 @@
 const bcrypt   = require('bcrypt');
 const jwt      = require('jsonwebtoken');
 const { User } = require('../models/index');
-
+const crypto = require('crypto');
+const { sendPasswordResetEmail } = require('../services/email.service');
 
 const login = async (req, res) => {
   try {
@@ -115,7 +116,81 @@ const register = async (req, res) => {
   }
 };
 
-// Add register to your exports
-module.exports = { login, resetPassword, register };
+const forgotPassword = async (req, res) => {
+    try {
+      const { email } = req.body;
+ 
+      const user = await User.findOne({ where: { email } });
+ 
+      // Always return success even if email not found
+      // This prevents email enumeration attacks
+      if (!user) {
+        return res.json({
+          message: 'If that email exists, a reset link has been sent.'
+        });
+      }
+ 
+      // Generate a random token
+      const token  = crypto.randomBytes(32).toString('hex');
+      const expiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+ 
+      await user.update({
+        inviteToken:  token,
+        inviteExpiry: expiry
+      });
+ 
+      // Send reset email
+      try {
+        await sendPasswordResetEmail(user.email, user.name, token);
+      } catch (mailErr) {
+        console.error('Reset email failed:', mailErr.message);
+      }
+ 
+      return res.json({
+        message: 'If that email exists, a reset link has been sent.'
+      });
+ 
+    } catch (err) {
+      console.error('forgotPassword error:', err);
+      return res.status(500).json({ message: 'Server error.' });
+    }
+  };
+ 
+  const resetPasswordWithToken = async (req, res) => {
+    try {
+      const { token, newPassword } = req.body;
+ 
+      const user = await User.findOne({
+        where: { inviteToken: token }
+      });
+ 
+      if (!user) {
+        return res.status(400).json({ message: 'Invalid or expired token.' });
+      }
+ 
+      // Check token hasn't expired
+      if (new Date() > new Date(user.inviteExpiry)) {
+        return res.status(400).json({ message: 'Token has expired. Request a new one.' });
+      }
+ 
+      const passwordHash = await bcrypt.hash(newPassword, 12);
+ 
+      await user.update({
+        passwordHash,
+        inviteToken:  null,
+        inviteExpiry: null,
+        isFirstLogin: false
+      });
+ 
+      return res.json({ message: 'Password reset successfully. You can now log in.' });
+ 
+    } catch (err) {
+      console.error('resetPasswordWithToken error:', err);
+      return res.status(500).json({ message: 'Server error.' });
+    }
+  };
+ 
 
+// Add register to your exports
+module.exports = { login, resetPassword, register, forgotPassword, resetPasswordWithToken };
 

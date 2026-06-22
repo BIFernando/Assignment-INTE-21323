@@ -36,9 +36,28 @@
           </select>
         `;
         document.getElementById('statusSelect')
-          .addEventListener('change', async (e) => {
-          await taskAPI.update(taskId, { status: e.target.value });
-        });
+    .addEventListener('change', async (e) => {
+      const newStatus = e.target.value;
+      try {
+        await taskAPI.update(taskId, { status: newStatus });
+        showToast('Success', 'Status updated to ' +
+          newStatus.replace('_', ' ') + '.', 'success');
+ 
+        // Update the status badge immediately without full reload
+        const statusBadge = document.querySelector(
+          '#taskMeta .badge[class*="status-"]'
+        );
+        if (statusBadge) {
+          statusBadge.className =
+            'badge status-' + newStatus.toLowerCase();
+          statusBadge.textContent = newStatus.replace('_', ' ');
+        }
+      } catch (err) {
+        showToast('Error', err.message, 'error');
+        // Revert dropdown if update failed
+        loadTaskDetail();
+      }
+    });
 
       } catch (err) {
         alert('Error loading task: ' + err.message);

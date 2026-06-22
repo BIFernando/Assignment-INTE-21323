@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
-const { login, resetPassword, register } = require("../controllers/auth.controller");
+const { login, resetPassword, register, forgotPassword, resetPasswordWithToken } = require("../controllers/auth.controller");
 const { verifyToken } = require('../middleware/auth.middleware');
 
 // Limit login to 10 attempts per 15 minutes
@@ -69,6 +69,28 @@ const validate = (req, res, next) => {
   }
   next();
 };
+
+ // POST /api/auth/forgot-password
+  router.post('/forgot-password',
+    body('email')
+      .trim()
+      .isEmail()
+      .withMessage('Valid email is required.')
+      .normalizeEmail(),
+    validate,
+    forgotPassword
+  );
+ 
+  // POST /api/auth/reset-password-token
+  router.post('/reset-password-token',
+    body('token').notEmpty().withMessage('Token is required.'),
+    body('newPassword')
+      .isLength({ min: 8 }).withMessage('Min 8 characters.')
+      .matches(/[A-Z]/).withMessage('Needs an uppercase letter.')
+      .matches(/[0-9]/).withMessage('Needs a number.'),
+    validate,
+    resetPasswordWithToken
+  );
 
 // POST /api/auth/login (with validation)
 router.post('/login', loginLimiter, loginValidation, validate, login);
