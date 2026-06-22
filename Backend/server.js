@@ -7,6 +7,8 @@ const morgan     = require('morgan');
 const hpp        = require('hpp');
 const http       = require('http');
 const { Server } = require('socket.io');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
 
 const sequelize  = require('./config/database');
 require('./models/index');
@@ -68,6 +70,13 @@ app.use(express.json({ limit: '10kb' }));
 
 // ── Static Files ─────────────────────────────────────────
 app.use('/uploads', express.static('uploads'));
+
+// Swagger Documentation
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec)
+);
 
 // ── Routes ───────────────────────────────────────────────
 app.use('/api/auth',          authRoutes);
