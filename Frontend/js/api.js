@@ -1,5 +1,5 @@
     // The base URL of your backend server
-    const API_BASE = `${window.location.protocol}//${window.location.hostname}:5000/api`;
+    const API_BASE = '/api';
 
     // Helper: get the stored JWT token
     function getToken() {
