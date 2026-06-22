@@ -10,67 +10,56 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  const user = getCurrentUser();
+    async function loadTaskDetail() {
+      try {
+        const task = await taskAPI.getById(taskId);
 
-  // ── Load Task Detail ──────────────────────────────
-  async function loadTaskDetail() {
-    try {
-      const task = await taskAPI.getById(taskId);
+        document.getElementById('taskTitle').textContent = task.title;
+        document.getElementById('taskDescription').textContent =
+          task.description || 'No description.';
+        document.getElementById('taskMeta').innerHTML =
+          `<span class="badge badge-${task.priority.toLowerCase()}">${task.priority}</span>
+           &nbsp; Due: ${task.dueDate
+             ? new Date(task.dueDate).toLocaleDateString() : 'No deadline'}`;
 
-      document.getElementById('taskTitle').textContent =
-        task.title;
+        // Assignees list
+        const assignees = task.assignees && task.assignees.length > 0
+          ? task.assignees.map(a => a.name).join(', ')
+          : 'Unassigned';
+        document.getElementById('taskAssignees').innerHTML =
+          '<strong>Assigned to:</strong> ' + assignees;
 
-      document.getElementById('taskDescription').textContent =
-        task.description || 'No description provided.';
-
-      document.getElementById('taskMeta').innerHTML = `
-        <span class="badge badge-${task.priority.toLowerCase()}">
-          ${task.priority}
-        </span>
-        <span class="badge status-${task.status.toLowerCase()}">
-          ${task.status.replace('_', ' ')}
-        </span>
-        ${task.dueDate ? `
-          <span style="font-size:13px; color:var(--text-muted);">
-            <i class="bi bi-calendar3"></i>
-            Due: ${new Date(task.dueDate).toLocaleDateString()}
-          </span>` : ''}
-      `;
-
-      const assignees = task.assignees && task.assignees.length > 0
-        ? task.assignees.map(a => a.name).join(', ')
-        : 'Unassigned';
-
-      document.getElementById('taskAssignees').innerHTML =
-        `<i class="bi bi-person"></i> <strong>Assigned to:</strong> ${assignees}`;
-
-      // Status dropdown
-      document.getElementById('statusSelector').innerHTML = `
-        <select class="filter-select" id="statusSelect">
-          <option value="TODO"
-            ${task.status === 'TODO' ? 'selected' : ''}>
-            To Do
-          </option>
-          <option value="IN_PROGRESS"
-            ${task.status === 'IN_PROGRESS' ? 'selected' : ''}>
-            In Progress
-          </option>
-          <option value="COMPLETED"
-            ${task.status === 'COMPLETED' ? 'selected' : ''}>
-            Completed
-          </option>
-        </select>
-      `;
-
-      document.getElementById('statusSelect')
-        .addEventListener('change', async (e) => {
-          try {
-            await taskAPI.update(taskId, { status: e.target.value });
-            showToast('Success', 'Status updated.', 'success');
-          } catch (err) {
-            showToast('Error', err.message, 'error');
-          }
-        });
+        // Status dropdown — all roles can update status
+        document.getElementById('statusSelector').innerHTML = `
+          <select class="btn btn-secondary btn-sm" id="statusSelect">
+            <option value="TODO"        ${task.status==='TODO'?'selected':''}>To Do</option>
+            <option value="IN_PROGRESS" ${task.status==='IN_PROGRESS'?'selected':''}>In Progress</option>
+            <option value="COMPLETED"   ${task.status==='COMPLETED'?'selected':''}>Completed</option>
+          </select>
+        `;
+        document.getElementById('statusSelect')
+    .addEventListener('change', async (e) => {
+      const newStatus = e.target.value;
+      try {
+        await taskAPI.update(taskId, { status: newStatus });
+        showToast('Success', 'Status updated to ' +
+          newStatus.replace('_', ' ') + '.', 'success');
+ 
+        // Update the status badge immediately without full reload
+        const statusBadge = document.querySelector(
+          '#taskMeta .badge[class*="status-"]'
+        );
+        if (statusBadge) {
+          statusBadge.className =
+            'badge status-' + newStatus.toLowerCase();
+          statusBadge.textContent = newStatus.replace('_', ' ');
+        }
+      } catch (err) {
+        showToast('Error', err.message, 'error');
+        // Revert dropdown if update failed
+        loadTaskDetail();
+      }
+    });
 
     } catch (err) {
       document.getElementById('pageError').textContent = err.message;

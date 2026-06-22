@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
-const { login, resetPassword, register } = require("../controllers/auth.controller");
+const { login, resetPassword, register, forgotPassword, resetPasswordWithToken } = require("../controllers/auth.controller");
 const { verifyToken } = require('../middleware/auth.middleware');
 
 // Limit login to 10 attempts per 15 minutes
