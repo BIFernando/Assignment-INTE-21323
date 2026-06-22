@@ -28,6 +28,8 @@
     "nodemailer": "^8.0.10",
     "sequelize": "^6.37.8",
     "socket.io": "^4.8.3",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1",
     "uuid": "^14.0.0",
     "xss-clean": "^0.1.4"
   },
