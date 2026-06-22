@@ -1,5 +1,5 @@
     // The base URL of your backend server
-    const API_BASE = 'http://localhost:5000/api';
+    const API_BASE = '/api';
 
     // Helper: get the stored JWT token
     function getToken() {
@@ -129,11 +129,11 @@
           body: JSON.stringify(data),
         }).then(handleResponse),
 
-      delete: (id) =>
-        fetch(API_BASE + '/tasks/' + id, {
-          method: 'DELETE',
-          headers: authHeaders(),
-        }).then(handleResponse),
+      deleteComment: (taskId, commentId) =>
+  fetch(API_BASE + '/tasks/' + taskId + '/comments/' + commentId, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  }).then(handleResponse),
 
       addComment: (taskId, content) =>
         fetch(API_BASE + '/tasks/' + taskId + '/comments', {

@@ -1,12 +1,14 @@
-    requireAuth();
-    renderNavbar();
+document.addEventListener('DOMContentLoaded', () => {
 
-    // Get task ID from URL: task-detail.html?id=abc123
-    const params = new URLSearchParams(window.location.search);
-    const taskId = params.get('id');
-    if (!taskId) window.location.href = 'tasks.html';
+  requireAuth();
+  renderSidebar('tasks');
 
-    const user = getCurrentUser();
+  const params = new URLSearchParams(window.location.search);
+  const taskId = params.get('id');
+  if (!taskId) {
+    window.location.href = 'projects.html';
+    return;
+  }
 
     async function loadTaskDetail() {
       try {
@@ -59,70 +61,193 @@
       }
     });
 
-      } catch (err) {
-        alert('Error loading task: ' + err.message);
-      }
+    } catch (err) {
+      document.getElementById('pageError').textContent = err.message;
+      document.getElementById('pageError').classList.add('show');
     }
+  }
 
-    async function loadComments() {
+  // ── Load Comments ─────────────────────────────────
+  async function loadComments() {
+    const list = document.getElementById('commentsList');
+    try {
       const comments = await taskAPI.getComments(taskId);
-      const list = document.getElementById('commentsList');
+
+      // Update badge count
+      const badge = document.getElementById('commentsBadge');
+      if (comments.length > 0) {
+        badge.textContent = comments.length;
+        badge.style.display = 'inline-flex';
+      } else {
+        badge.style.display = 'none';
+      }
+
       if (comments.length === 0) {
-        list.innerHTML = '<p style="color:#888; font-size:14px;">No comments yet.</p>';
+        list.innerHTML = `
+          <div class="notif-empty">
+            <i class="bi bi-chat-left"
+               style="font-size:28px; opacity:0.3;"></i>
+            <div style="margin-top:8px;">No comments yet.</div>
+            <div style="font-size:12px; margin-top:4px;">
+              Be the first to comment.
+            </div>
+          </div>`;
         return;
       }
+
       list.innerHTML = comments.map(c => `
-        <div style="border-bottom:1px solid #eee; padding:10px 0;">
-          <strong style="font-size:13px;">${c.User ? c.User.name : 'User'}</strong>
-          <span style="font-size:12px; color:#aaa; margin-left:8px;">
-            ${new Date(c.createdAt).toLocaleString()}
-          </span>
-          <p style="margin-top:4px; font-size:14px;">${c.content}</p>
+        <div class="notif-item" style="align-items:flex-start;">
+          <div class="sidebar-avatar"
+               style="width:32px; height:32px; font-size:12px; flex-shrink:0;">
+            ${c.author
+              ? c.author.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2)
+              : '?'}
+          </div>
+          <div style="flex:1; min-width:0;">
+            <div style="display:flex; justify-content:space-between;
+                        align-items:center; margin-bottom:4px;">
+              <span style="font-size:13px; font-weight:600;
+                           color:var(--text);">
+                ${c.author ? c.author.name : 'Unknown'}
+              </span>
+              <span style="font-size:11px; color:var(--text-muted);">
+                ${timeAgo(c.createdAt)}
+              </span>
+            </div>
+            <div style="font-size:13px; color:var(--text-secondary);
+                        line-height:1.5; word-break:break-word;">
+              ${c.content}
+            </div>
+            ${c.userId === user.id ? `
+              <button onclick="deleteComment('${c.id}')"
+                style="background:none; border:none; color:var(--danger);
+                       font-size:11px; cursor:pointer; padding:4px 0;
+                       margin-top:4px;">
+                Delete
+              </button>
+            ` : ''}
+          </div>
         </div>
       `).join('');
-    }
 
-    async function loadAttachments() {
-      const files = await taskAPI.getAttachments(taskId);
-      const list  = document.getElementById('attachmentsList');
-      if (files.length === 0) {
-        list.innerHTML = '<p style="color:#888; font-size:14px;">No attachments yet.</p>';
-        return;
-      }
-      list.innerHTML = files.map(f => `
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
-          <span style="font-size:14px;">📎 ${f.fileName}</span>
-          <a href="http://localhost:5000/${f.fileUrl}"
-             target="_blank" class="btn btn-secondary btn-sm">View</a>
-        </div>
-      `).join('');
+    } catch (err) {
+      list.innerHTML =
+        `<div class="notif-empty">Could not load comments.</div>`;
     }
+  }
 
-    // Add comment
-    document.getElementById('addCommentBtn')
-      .addEventListener('click', async () => {
-      const content = document.getElementById('commentInput').value.trim();
+  // ── Time Ago Helper ───────────────────────────────
+  function timeAgo(dateStr) {
+    const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+    if (diff < 60)    return 'Just now';
+    if (diff < 3600)  return Math.floor(diff / 60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+    return Math.floor(diff / 86400) + 'd ago';
+  }
+
+  // ── Add Comment ───────────────────────────────────
+  document.getElementById('addCommentBtn')
+    .addEventListener('click', async () => {
+      const content =
+        document.getElementById('commentInput').value.trim();
       if (!content) return;
+
       try {
         await taskAPI.addComment(taskId, content);
         document.getElementById('commentInput').value = '';
         loadComments();
-      } catch (err) { alert(err.message); }
+      } catch (err) {
+        showToast('Error', err.message, 'error');
+      }
     });
 
-    // Upload file
-    document.getElementById('uploadBtn')
-      .addEventListener('click', async () => {
+  // ── Delete Comment ────────────────────────────────
+  window.deleteComment = async function(id) {
+    const ok = await appConfirm(
+      'Delete Comment?',
+      'This cannot be undone.',
+      'Delete'
+    );
+    if (!ok) return;
+    try {
+      await taskAPI.deleteComment(taskId, id);
+      loadComments();
+    } catch (err) {
+      showToast('Error', err.message, 'error');
+    }
+  };
+
+  // ── Comments Panel ────────────────────────────────
+  document.getElementById('commentsBtn')
+    .addEventListener('click', () => {
+      document.getElementById('commentsPanel').classList.add('open');
+      document.getElementById('commentsOverlay').classList.add('open');
+      loadComments();
+    });
+
+  window.closeComments = function() {
+    document.getElementById('commentsPanel').classList.remove('open');
+    document.getElementById('commentsOverlay').classList.remove('open');
+  };
+
+  // ── Load Attachments ──────────────────────────────
+  async function loadAttachments() {
+    const list = document.getElementById('attachmentsList');
+    try {
+      const files = await taskAPI.getAttachments(taskId);
+
+      if (files.length === 0) {
+        list.innerHTML =
+          `<p style="color:var(--text-muted); font-size:14px;">
+             No attachments yet.
+           </p>`;
+        return;
+      }
+
+      list.innerHTML = files.map(f => `
+        <div style="display:flex; align-items:center; gap:10px;
+                    padding:8px 0; border-bottom:1px solid var(--border-light);">
+          <i class="bi bi-file-earmark"
+             style="color:var(--primary); font-size:18px;"></i>
+          <span style="font-size:14px; flex:1;">${f.fileName}</span>
+          <a href="http://localhost:5000/${f.fileUrl}"
+             target="_blank"
+             class="btn btn-secondary btn-sm">
+            <i class="bi bi-eye"></i> View
+          </a>
+        </div>
+      `).join('');
+
+    } catch (err) {
+      list.innerHTML =
+        `<p style="color:var(--danger); font-size:14px;">
+           Could not load attachments.
+         </p>`;
+    }
+  }
+
+  // ── Upload Attachment ─────────────────────────────
+  document.getElementById('uploadBtn')
+    .addEventListener('click', async () => {
       const file = document.getElementById('fileInput').files[0];
-      if (!file) { alert('Please choose a file first.'); return; }
+      if (!file) {
+        showToast('Error', 'Please choose a file first.', 'error');
+        return;
+      }
       try {
         await taskAPI.uploadAttachment(taskId, file);
         document.getElementById('fileInput').value = '';
+        showToast('Success', 'File uploaded.', 'success');
         loadAttachments();
-      } catch (err) { alert(err.message); }
+      } catch (err) {
+        showToast('Error', err.message, 'error');
+      }
     });
 
-    // Load everything
-    loadTaskDetail();
-    loadComments();
-    loadAttachments();
+
+  // ── Init ──────────────────────────────────────────
+  loadTaskDetail();
+  loadAttachments();
+  // Comments load when panel opens, not on page load
+
+});

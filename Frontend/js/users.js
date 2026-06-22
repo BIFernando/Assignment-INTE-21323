@@ -111,6 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
       el.classList.add('show');
       setTimeout(() => el.classList.remove('show'), 3000);
     }
-
+    window.deactivateUser = deactivateUser;
     loadUsers();
   });
