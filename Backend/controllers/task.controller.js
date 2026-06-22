@@ -14,59 +14,58 @@ function sanitize(str) {
 }
 // ── CREATE TASK ────────────────────────────────────────
 const createTask = async (req, res) => {
-  try {
-    const { title, description, priority, status, dueDate, assigneeIds } = req.body;
-
-    if (!title) {
-      return res.status(400).json({ error: 'Title is required.' });
-    }
-
-    if (dueDate) {
-      const due = new Date(dueDate);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      if (due < today) {
-        return res.status(400).json({ error: 'Due date cannot be in the past.' });
+    try {
+      const { title, description, priority, status, dueDate, projectId } = req.body;
+ 
+      if (!title) {
+        return res.status(400).json({ error: 'Title is required.' });
       }
+ 
+      if (!projectId) {
+        return res.status(400).json({ error: 'Project ID is required.' });
+      }
+ 
+      // Check user is admin or project_manager in this project
+      const { ProjectMember } = require('../models/index');
+      const membership = await ProjectMember.findOne({
+        where: { projectId, userId: req.user.id }
+      });
+ 
+      if (!membership || membership.role === 'collaborator') {
+        return res.status(403).json({
+          error: 'Only project admins and managers can create tasks.'
+        });
+      }
+ 
+      if (dueDate) {
+        const due = new Date(dueDate);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (due < today) {
+          return res.status(400).json({ error: 'Due date cannot be in the past.' });
+        }
+      }
+ 
+      const task = await Task.create({
+        title:       sanitize(title),
+        description: sanitize(description) || null,
+        priority:    priority || 'MEDIUM',
+        status:      status   || 'TODO',
+        dueDate:     dueDate  || null,
+        projectId,
+        createdBy:   req.user.id,
+      });
+ 
+      res.status(201).json({
+        message: 'Task created successfully.',
+        task,
+      });
+    } catch (err) {
+      console.error('createTask error:', err);
+      res.status(500).json({ error: 'Server error.', details: err.message });
     }
-
-    const task = await Task.create({
-  title:       sanitize(title),
-  description: sanitize(description),
-  priority:    priority || 'MEDIUM',
-  status:      status   || 'TODO',
-  dueDate:     dueDate  || null,
-  projectId: req.body.projectId,   
-  createdBy: req.user.id,
-});
-
-    if (assigneeIds && assigneeIds.length > 0) {
-      const assignments = assigneeIds.map(userId => ({
-        taskId: task.id,
-        userId: userId,
-      }));
-      await TaskAssignment.bulkCreate(assignments);
-       const io = req.app.get('io');
-
-  for (const userId of assigneeIds) {
-    await createNotification(
-      io,
-      userId,
-      'You have been assigned a new task: ' + title,
-      'ASSIGNMENT'
-    );
-  }
-    }
-
-    res.status(201).json({
-      message: 'Task created successfully.',
-      task: task,
-    });
-  } catch (err) {
-    res.status(500).json({ error: 'Server error.', details: err.message });
-  }
-};
-
+  };
+ 
 // ── GET ALL TASKS ──────────────────────────────────────
 const getAllTasks = async (req, res) => {
   try {

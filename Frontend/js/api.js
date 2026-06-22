@@ -1,5 +1,5 @@
     // The base URL of your backend server
-    const API_BASE = `${window.location.protocol}//${window.location.hostname}:5000/api`;
+    const API_BASE = '/api';
 
     // Helper: get the stored JWT token
     function getToken() {
@@ -45,6 +45,20 @@
           headers: authHeaders(),
           body: JSON.stringify({ newPassword }),
         }).then(handleResponse),
+
+        forgotPassword: (email) =>
+      fetch(API_BASE + '/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      }).then(handleResponse),
+ 
+    resetPasswordWithToken: (token, newPassword) =>
+      fetch(API_BASE + '/auth/reset-password-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, newPassword }),
+      }).then(handleResponse),
     };
 
     // ── USERS ──────────────────────────────────────
@@ -78,6 +92,13 @@
       fetch(API_BASE + '/users/search?email=' + encodeURIComponent(email), {
         headers: authHeaders()
       }).then(handleResponse),
+
+       updateProfile: (data) =>
+    fetch(API_BASE + '/users/profile', {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: JSON.stringify(data),
+    }).then(handleResponse),
   };
 
     // ── TASKS ──────────────────────────────────────
@@ -163,6 +184,11 @@
       method: 'PUT',
       headers: authHeaders(),
     }).then(handleResponse),
+    deleteComment: (taskId, commentId) =>
+      fetch(API_BASE + '/tasks/' + taskId + '/comments/' + commentId, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      }).then(handleResponse),
 };
 
 const projectAPI = {
