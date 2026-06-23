@@ -1295,3 +1295,88 @@ img { max-width: 100%; }
   z-index: 3000;
 }
 
+
+ /* Tablet and below (max 768px) */
+  @media (max-width: 768px) {
+ 
+    /* Hide sidebar by default on mobile */
+    .sidebar {
+      transform: translateX(-100%);
+      position: fixed;
+      z-index: 1000;
+      transition: transform 0.3s ease;
+    }
+ 
+    /* Show sidebar when open class is added */
+    .sidebar.open {
+      transform: translateX(0);
+    }
+ 
+    /* Main content takes full width */
+    .main-content {
+      margin-left: 0 !important;
+      padding: 16px !important;
+      width: 100% !important;
+    }
+ 
+    /* Show hamburger menu button */
+    .hamburger-btn {
+      display: flex !important;
+    }
+ 
+    /* Stack cards in a single column */
+    .projects-grid,
+    .cards-grid {
+      grid-template-columns: 1fr !important;
+    }
+ 
+    /* Make tables scrollable horizontally */
+    .table-responsive {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+ 
+    /* Kanban columns scroll horizontally */
+    .kanban-board {
+      overflow-x: auto;
+      display: flex;
+      gap: 12px;
+      padding-bottom: 12px;
+    }
+ 
+    .kanban-column {
+      min-width: 260px;
+      flex-shrink: 0;
+    }
+ 
+    /* Modal full width on mobile */
+    .modal-box {
+      width: 95vw !important;
+      max-width: 95vw !important;
+      margin: 20px auto;
+    }
+ 
+    /* Page header stacks on mobile */
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+ 
+    /* Buttons full width on mobile in forms */
+    .modal-footer .btn {
+      width: 100%;
+      margin-bottom: 8px;
+    }
+  }
+ 
+  /* Large screens — make sure sidebar is always visible */
+  @media (min-width: 769px) {
+    .hamburger-btn {
+      display: none !important;
+    }
+    .sidebar {
+      transform: translateX(0) !important;
+    }
+  }
+

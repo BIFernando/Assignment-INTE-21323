@@ -277,10 +277,40 @@ const removeMember = async (req, res) => {
   }
 };
 
+ const deleteProject = async (req, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+ 
+      // Find the project
+      const project = await Project.findByPk(id);
+      if (!project) {
+        return res.status(404).json({ error: 'Project not found.' });
+      }
+ 
+      // Only project admin can delete
+      const member = await ProjectMember.findOne({
+        where: { projectId: id, userId }
+      });
+      if (!member || member.role !== 'admin') {
+        return res.status(403).json({
+          error: 'Only the project admin can delete this project.'
+        });
+      }
+ 
+      await project.destroy();
+      res.json({ message: 'Project deleted successfully.' });
+    } catch (err) {
+      console.error('deleteProject error:', err);
+      res.status(500).json({ error: 'Server error.' });
+    }
+  };
+
 module.exports = {
   createProject,
   getMyProjects,
   getProjectById,
+  deleteProject,
   inviteMember,
   updateMemberRole,
   removeMember,
