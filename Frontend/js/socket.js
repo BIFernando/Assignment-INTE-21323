@@ -1,5 +1,5 @@
 // Connect to the backend Socket.io server
-    const socket = io(`${window.location.protocol}//${window.location.hostname}:5000`);
+    const socket = io();//(`${window.location.protocol}//${window.location.hostname}:5000`);
 
     // Authenticate the socket with our JWT token
     socket.on('connect', () => {
