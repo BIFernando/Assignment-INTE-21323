@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-  requireAuth(); // ← must be FIRST
+  requireAuth(); 
   renderSidebar('tasks');
 
   const user = getCurrentUser();
@@ -22,7 +22,28 @@ document.addEventListener('DOMContentLoaded', () => {
   if (user.role === 'collaborator') {
     document.getElementById('createTaskBtn').style.display = 'none';
   }
-
+// Load project members for assignment dropdown
+  async function loadProjectMembers() {
+    try {
+      const project = await projectAPI.getById(projectId);
+      const select  = document.getElementById('taskAssignees');
+ 
+      if (!project.members || project.members.length === 0) {
+        select.innerHTML =
+          '<option disabled>No members found</option>';
+        return;
+      }
+ 
+      select.innerHTML = project.members.map(m => `
+        <option value="${m.userId}">
+          ${m.user ? m.user.name : 'Unknown'}
+          (${m.role.replace('_', ' ')})
+        </option>
+      `).join('');
+    } catch (err) {
+      console.error('Could not load members:', err);
+    }
+  }
   // ── Load Tasks ─────────────────────────────────
   async function loadTasks() {
     try {
@@ -104,23 +125,30 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       container.innerHTML = cards.map(task => `
-        <div class="kanban-card priority-${task.priority.toLowerCase()}"
-             data-id="${task.id}"
-             onclick="window.location.href='task-detail.html?id=${task.id}'">
-          <div class="kanban-card-title">${task.title}</div>
-          <div class="kanban-card-meta">
-            <span class="badge badge-${task.priority.toLowerCase()}">
-              ${task.priority}
-            </span>
-            ${task.dueDate ? `
-              <span class="kanban-card-date">
-                <i class="bi bi-calendar3"></i>
-                ${new Date(task.dueDate).toLocaleDateString()}
-              </span>` : ''}
-          </div>
-        </div>
-      `).join('');
-    });
+  <div class="kanban-card priority-${task.priority.toLowerCase()}"
+       data-id="${task.id}"
+       onclick="window.location.href='task-detail.html?id=${task.id}'">
+    <div class="kanban-card-title">${task.title}</div>
+    <div class="kanban-card-meta">
+      <span class="badge badge-${task.priority.toLowerCase()}">
+        ${task.priority}
+      </span>
+      ${task.dueDate ? `
+        <span class="kanban-card-date">
+          <i class="bi bi-calendar3"></i>
+          ${new Date(task.dueDate).toLocaleDateString()}
+        </span>` : ''}
+    </div>
+
+    ${task.assignees && task.assignees.length > 0 ? `
+      <div style="margin-top:8px; font-size:11px; color:var(--text-muted);">
+        <i class="bi bi-person"></i>
+        ${task.assignees.map(a => a.name).join(', ')}
+      </div>
+    ` : ''}
+
+  </div>
+`).join('');
 
     // Drag and drop
     statuses.forEach(status => {
@@ -128,19 +156,17 @@ document.addEventListener('DOMContentLoaded', () => {
         group: 'tasks',
         animation: 150,
         ghostClass: 'dragging',
-        onEnd: async (evt) => {
-          const taskId    = evt.item.dataset.id;
-          const newStatus = evt.to.id.replace('cards-', '');
-          try {
-            await taskAPI.update(taskId, { status: newStatus });
-          } catch (err) {
-            showToast('Error', 'Could not update task status.', 'error');
-            loadTasks();
-          }
+        onEnd: async (evt) => { const taskId = evt.item.dataset.id; 
+          const newStatus = evt.to.id.replace('cards-', ''); 
+          try { await taskAPI.update(taskId, { status: newStatus }); 
+          loadTasks(); } catch (err) { showToast('Error', 'Could not update task status.', 'error'); 
+            loadTasks(); 
+          } 
         }
       });
     });
-  }
+  });
+}
 
   // ── Toggle View ────────────────────────────────
   const toggleBtn = document.getElementById('toggleView');
@@ -156,45 +182,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Create Task Modal ──────────────────────────
   document.getElementById('createTaskBtn').addEventListener('click', () => {
-    document.getElementById('createModal').classList.add('show');
-  });
+  loadProjectMembers();
+  document.getElementById('createModal').classList.add('show');
+});
 
   document.getElementById('closeModal').addEventListener('click', () => {
     document.getElementById('createModal').classList.remove('show');
   });
 
-  document.getElementById('saveTaskBtn').addEventListener('click', async () => {
-    const title    = document.getElementById('taskTitle').value.trim();
-    const desc     = document.getElementById('taskDesc').value.trim();
-    const priority = document.getElementById('taskPriority').value;
-    const dueDate  = document.getElementById('taskDueDate').value;
+document.getElementById('saveTaskBtn').addEventListener('click', async () => {
+  const title    = document.getElementById('taskTitle').value.trim();
+  const desc     = document.getElementById('taskDesc').value.trim();
+  const priority = document.getElementById('taskPriority').value;
+  const dueDate  = document.getElementById('taskDueDate').value;
 
-    document.getElementById('titleError').classList.remove('show');
-    document.getElementById('modalError').classList.remove('show');
+  // Get selected assignee IDs from multi-select
+  const assigneeSelect = document.getElementById('taskAssignees');
+  const assigneeIds = Array.from(assigneeSelect.selectedOptions)
+    .map(opt => opt.value);
 
-    if (!title) {
-      document.getElementById('titleError').classList.add('show');
-      return;
-    }
+  document.getElementById('titleError').classList.remove('show');
+  document.getElementById('modalError').classList.remove('show');
 
-    try {
-      await taskAPI.create({
-        title,
-        description: desc,
-        priority,
-        dueDate:   dueDate || null,
-        projectId            // ← always send projectId with new tasks
-      });
-      document.getElementById('createModal').classList.remove('show');
-      document.getElementById('taskTitle').value = '';
-      document.getElementById('taskDesc').value  = '';
-      loadTasks();
-    } catch (err) {
-      const errEl = document.getElementById('modalError');
-      errEl.textContent = err.message;
-      errEl.classList.add('show');
-    }
-  });
+  if (!title) {
+    document.getElementById('titleError').classList.add('show');
+    return;
+  }
+
+  try {
+    const task = await taskAPI.create({
+      title,
+      description: desc,
+      priority,
+      dueDate: dueDate || null,
+      projectId,
+      assigneeIds
+    });
+
+    document.getElementById('createModal').classList.remove('show');
+    document.getElementById('taskTitle').value = '';
+    document.getElementById('taskDesc').value = '';
+    assigneeSelect.selectedIndex = -1;
+
+    loadTasks();
+  } catch (err) {
+    const errEl = document.getElementById('modalError');
+    errEl.textContent = err.message;
+    errEl.classList.add('show');
+  }
+});
 
   // ── Delete Task ────────────────────────────────
   window.deleteTask = async function(id) {
@@ -214,4 +250,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadTasks();
 
-}); // end DOMContentLoaded
+}); 
+// end DOMContentLoaded

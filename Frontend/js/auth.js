@@ -81,16 +81,29 @@ function renderSidebar(activePage) {
             </a>
           </nav>
 
-          <div class="sidebar-user">
-            <div class="sidebar-avatar">${getInitials(user.name)}</div>
-            <div class="sidebar-user-info">
-              <div class="sidebar-user-name">${user.name}</div>
-              <div class="sidebar-user-role">${getRoleBadge(user.role)}</div>
-            </div>
-            <button class="sidebar-logout" onclick="logout()" title="Sign out">
-              <i class="bi bi-box-arrow-right"></i>
-            </button>
-          </div>
+         <div class="sidebar-user"
+     onclick="window.location.href='profile.html'"
+     style="cursor:pointer;"
+     title="View Profile">
+
+  <div class="sidebar-avatar">
+    ${getInitials(user.name)}
+  </div>
+
+  <div class="sidebar-user-info">
+    <div class="sidebar-user-name">${user.name}</div>
+    <div class="sidebar-user-role">
+      ${getRoleBadge(user.role)}
+    </div>
+  </div>
+
+  <button class="sidebar-logout"
+          onclick="event.stopPropagation(); logout()"
+          title="Sign out">
+    <i class="bi bi-box-arrow-right"></i>
+  </button>
+
+</div>
         </aside>
       `;
 
