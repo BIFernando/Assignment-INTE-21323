@@ -19,6 +19,14 @@
 
       <!-- Topbar -->
       <div class="topbar">
+        <button class="hamburger-btn"
+          id="hamburgerBtn"
+          style="display:none; align-items:center; justify-content:center;
+                 background:none; border:none; cursor:pointer;
+                 padding:8px; color:var(--text);"
+          onclick="document.querySelector('.sidebar').classList.toggle('open')">
+    <i class="bi bi-list" style="font-size:24px;"></i>
+  </button>
         <div>
           <div class="topbar-title">Dashboard</div>
           <div class="topbar-subtitle">Overview of your tasks</div>

@@ -18,15 +18,26 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       grid.innerHTML = projects.map(p => `
-        <div class="card" style="cursor:pointer;"
-             onclick="window.location.href='project-detail.html?projectId=${p.id}'">
-          <div style="font-size:18px; font-weight:700; margin-bottom:6px;">${p.name}</div>
-          <div style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">
-            ${p.description || "No description"}
-          </div>
-          <span class="badge badge-${p.myRole}">${p.myRole.replace("_"," ")}</span>
-        </div>
-      `).join("");
+        <div class="card" style="position:relative;">
+      <div style="font-size:18px; font-weight:700; margin-bottom:6px;
+                  cursor:pointer;"
+           onclick="window.location.href='project-detail.html?projectId=${p.id}'">
+        ${p.name}
+      </div>
+      <div style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">
+        ${p.description || "No description"}
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span class="badge badge-${p.myRole}">${p.myRole.replace("_"," ")}</span>
+        ${p.myRole === 'admin' ? `
+          <button class="btn btn-danger btn-sm"
+            onclick="event.stopPropagation(); deleteProject('${p.id}')">
+            Delete
+          </button>
+        ` : ''}
+      </div>
+    </div>
+  `).join("");
     } catch (err) {
       document.getElementById("pageError").textContent = err.message;
       document.getElementById("pageError").classList.add("show");
@@ -64,6 +75,23 @@ document.addEventListener("DOMContentLoaded", () => {
       errEl.classList.add("show");
     }
   });
+
+   window.deleteProject = async function(id) {
+    const ok = await appConfirm(
+      'Delete Project?',
+      'This will permanently delete the project and all its tasks.',
+      'Delete'
+    );
+    if (!ok) return;
+    try {
+      await projectAPI.delete(id);
+      showToast('Success', 'Project deleted.', 'success');
+      loadProjects();
+    } catch (err) {
+      showToast('Error', err.message, 'error');
+    }
+  };
+ 
 
   loadProjects();
 });

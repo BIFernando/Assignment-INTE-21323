@@ -13,7 +13,8 @@ const express = require('express');
     getProjectById,
     inviteMember,
     updateMemberRole,
-    removeMember
+    removeMember,
+    deleteProject
   } = require('../controllers/project.controller');
  
   router.use(verifyToken);
@@ -138,5 +139,6 @@ const express = require('express');
  *         description: Member removed successfully
  */
   router.delete('/:id/members/:userId',     removeMember);
+  router.delete('/:id', deleteProject);
  
   module.exports = router;

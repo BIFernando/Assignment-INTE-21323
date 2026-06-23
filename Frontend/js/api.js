@@ -129,6 +129,12 @@
           body: JSON.stringify(data),
         }).then(handleResponse),
 
+        delete: (id) =>
+        fetch(API_BASE + '/tasks/' + id, {
+          method: 'DELETE',
+          headers: authHeaders(),
+        }).then(handleResponse),
+
       deleteComment: (taskId, commentId) =>
   fetch(API_BASE + '/tasks/' + taskId + '/comments/' + commentId, {
     method: 'DELETE',
@@ -207,6 +213,12 @@ const projectAPI = {
   getById: (id) =>
     fetch(API_BASE + "/projects/" + id, {
       headers: authHeaders()
+    }).then(handleResponse),
+
+    delete: (id) =>
+    fetch(API_BASE + '/projects/' + id, {
+      method: 'DELETE',
+      headers: authHeaders(),
     }).then(handleResponse),
 
   invite: (projectId, email, role) =>
