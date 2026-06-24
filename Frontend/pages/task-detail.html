@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,16 +32,12 @@
 
     <!-- Add Comment -->
     <div style="padding:16px; border-top:1px solid var(--border); flex-shrink:0;">
-      <textarea id="commentInput"
-                rows="3"
-                placeholder="Write a comment..."
-                style="width:100%; padding:10px 14px; border:1.5px solid var(--border);
+      <textarea id="commentInput" rows="3" placeholder="Write a comment..." style="width:100%; padding:10px 14px; border:1.5px solid var(--border);
                        border-radius:var(--radius-sm); font-family:'DM Sans',sans-serif;
                        font-size:14px; resize:none; outline:none;
                        background:var(--card); color:var(--text);">
       </textarea>
-      <button class="btn btn-primary" id="addCommentBtn"
-              style="width:100%; margin-top:8px;">
+      <button class="btn btn-primary" id="addCommentBtn" style="width:100%; margin-top:8px;">
         <i class="bi bi-send"></i> Send Comment
       </button>
     </div>
@@ -53,8 +50,7 @@
       <div class="topbar">
         <div>
           <div style="font-size:13px; color:var(--text-muted); margin-bottom:4px;">
-            <a href="javascript:history.back()"
-               style="color:var(--primary); text-decoration:none;">
+            <a href="javascript:history.back()" style="color:var(--primary); text-decoration:none;">
               ← Back
             </a>
           </div>
@@ -68,8 +64,7 @@
           <button class="btn btn-secondary" id="commentsBtn">
             <i class="bi bi-chat-left-text"></i>
             Comments
-            <span class="notif-badge" id="commentsBadge"
-                  style="position:relative; top:0; right:0; margin-left:4px;
+            <span class="notif-badge" id="commentsBadge" style="position:relative; top:0; right:0; margin-left:4px;
                          background:var(--primary);">
             </span>
           </button>
@@ -83,20 +78,23 @@
         <div style="display:flex; justify-content:space-between;
                     align-items:flex-start; flex-wrap:wrap; gap:12px;">
           <div style="flex:1;">
-            <h2 id="taskTitle"
-                style="font-size:22px; font-weight:700;
+            <h2 id="taskTitle" style="font-size:22px; font-weight:700;
                        margin-bottom:10px; color:var(--text);">
               Loading...
             </h2>
             <div id="taskMeta" style="display:flex; gap:8px;
                  align-items:center; flex-wrap:wrap; margin-bottom:12px;">
             </div>
-            <p id="taskDescription"
-               style="color:var(--text-secondary); font-size:14px;
+            <p id="taskDescription" style="color:var(--text-secondary); font-size:14px;
                       line-height:1.6; margin-bottom:12px;">
             </p>
-            <div id="taskAssignees"
-                 style="font-size:14px; color:var(--text-secondary);">
+            <div style="display:flex; gap:10px; align-items:center;">
+              <div id="taskAssignees">
+                <!-- Shows "Assigned to: John, Jane" -->
+              </div>
+              <button class="btn btn-secondary btn-sm" id="editAssigneesBtn">
+                <i class="bi bi-pencil"></i> Edit
+              </button>
             </div>
           </div>
 
@@ -115,14 +113,41 @@
         <div id="attachmentsList" style="margin-bottom:16px;"></div>
 
         <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-          <input type="file" id="fileInput"
-                 style="font-size:13px; color:var(--text-secondary);">
+          <input type="file" id="fileInput" style="font-size:13px; color:var(--text-secondary);">
           <button class="btn btn-secondary btn-sm" id="uploadBtn">
             <i class="bi bi-upload"></i> Upload File
           </button>
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- Edit Assignees Modal -->
+  <div class="modal-overlay" id="assigneesModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">Assign Users to Task</span>
+        <span class="modal-close" id="closeAssigneesModal">&times;</span>
+      </div>
+      <div class="alert error" id="assigneesError"></div>
+      <div class="form-group">
+        <label>Select Assignees</label>
+        <select id="assigneesSelect" class="form-control" multiple>
+          <!-- populated by JavaScript -->
+        </select>
+        <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">
+          Hold Ctrl (or Cmd) to select multiple
+        </div>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-primary" id="saveAssigneesBtn" style="flex:1;">
+          Save
+        </button>
+        <button class="btn btn-ghost" id="closeAssigneesModal2" style="flex:1;">
+          Cancel
+        </button>
+      </div>
     </div>
   </div>
 
@@ -133,4 +158,5 @@
   <script src="../js/task-detail.js"></script>
 
 </body>
+
 </html>

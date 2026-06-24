@@ -90,13 +90,6 @@ function renderSidebar(activePage) {
     ${getInitials(user.name)}
   </div>
 
-  <div class="sidebar-user-info">
-    <div class="sidebar-user-name">${user.name}</div>
-    <div class="sidebar-user-role">
-      ${getRoleBadge(user.role)}
-    </div>
-  </div>
-
   <button class="sidebar-logout"
           onclick="event.stopPropagation(); logout()"
           title="Sign out">
@@ -311,5 +304,15 @@ function appConfirm(title, message, okLabel = 'Delete') {
 document.addEventListener('DOMContentLoaded', () => {
   renderNotificationPanel();
   renderConfirmDialog();
+  
+  // Wire up notification bell button — attach directly
+  const notifBtn = document.getElementById('notifBtn');
+  if (notifBtn) {
+    notifBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleNotifPanel();
+    });
+  }
 });
 

@@ -198,20 +198,32 @@ res.status(200).json({
 
 // ── DELETE TASK ────────────────────────────────────────
 const deleteTask = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const task = await Task.findByPk(id);
-    if (!task) {
-      return res.status(404).json({ error: 'Task not found.' });
+    try {
+      const { id } = req.params;
+      const task = await Task.findByPk(id);
+      if (!task) {
+        return res.status(404).json({ error: 'Task not found.' });
+      }
+ 
+      // Check user is project admin or manager
+      const { ProjectMember } = require('../models/index');
+      const membership = await ProjectMember.findOne({
+        where: { projectId: task.projectId, userId: req.user.id }
+      });
+ 
+      if (!membership || membership.role === 'collaborator') {
+        return res.status(403).json({
+          error: 'Only project admins and managers can delete tasks.'
+        });
+      }
+ 
+      await task.destroy();
+      res.status(200).json({ message: 'Task deleted successfully.' });
+    } catch (err) {
+      console.error('deleteTask error:', err);
+      res.status(500).json({ error: 'Server error.', details: err.message });
     }
-
-    await task.destroy();
-    res.status(200).json({ message: 'Task deleted successfully.' });
-  } catch (err) {
-    res.status(500).json({ error: 'Server error.', details: err.message });
-  }
-};
+  };
 
 // ── ASSIGN USERS TO TASK ───────────────────────────────
 const assignUsers = async (req, res) => {
