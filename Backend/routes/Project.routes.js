@@ -14,8 +14,8 @@ const express = require('express');
     inviteMember,
     updateMemberRole,
     removeMember,
-    deleteProject
-  } = require('../controllers/project.controller');
+    deleteProject,
+  } = require('../controllers/Project.controller');
  
   router.use(verifyToken);
  

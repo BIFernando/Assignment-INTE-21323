@@ -310,8 +310,8 @@ module.exports = {
   createProject,
   getMyProjects,
   getProjectById,
-  deleteProject,
   inviteMember,
   updateMemberRole,
   removeMember,
+  deleteProject
 };
