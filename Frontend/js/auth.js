@@ -90,13 +90,6 @@ function renderSidebar(activePage) {
     ${getInitials(user.name)}
   </div>
 
-  <div class="sidebar-user-info">
-    <div class="sidebar-user-name">${user.name}</div>
-    <div class="sidebar-user-role">
-      ${getRoleBadge(user.role)}
-    </div>
-  </div>
-
   <button class="sidebar-logout"
           onclick="event.stopPropagation(); logout()"
           title="Sign out">

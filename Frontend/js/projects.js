@@ -18,16 +18,15 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       grid.innerHTML = projects.map(p => `
-        <div class="card" style="position:relative;">
-      <div style="font-size:18px; font-weight:700; margin-bottom:6px;
-                  cursor:pointer;"
+    <div class="card" style="position:relative; display:flex; flex-direction:column; justify-content:space-between;">
+      <div style="cursor:pointer;"
            onclick="window.location.href='project-detail.html?projectId=${p.id}'">
-        ${p.name}
+        <div style="font-size:18px; font-weight:700; margin-bottom:6px;">${p.name}</div>
+        <div style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">
+          ${p.description || "No description"}
+        </div>
       </div>
-      <div style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">
-        ${p.description || "No description"}
-      </div>
-      <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
         <span class="badge badge-${p.myRole}">${p.myRole.replace("_"," ")}</span>
         ${p.myRole === 'admin' ? `
           <button class="btn btn-danger btn-sm"
@@ -79,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
    window.deleteProject = async function(id) {
     const ok = await appConfirm(
       'Delete Project?',
-      'This will permanently delete the project and all its tasks.',
+      'This will permanently delete the project and all its tasks. This cannot be undone.',
       'Delete'
     );
     if (!ok) return;

@@ -45,19 +45,12 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('Success', 'Status updated to ' +
           newStatus.replace('_', ' ') + '.', 'success');
  
-        // Update the status badge immediately without full reload
-        const statusBadge = document.querySelector(
-          '#taskMeta .badge[class*="status-"]'
-        );
-        if (statusBadge) {
-          statusBadge.className =
-            'badge status-' + newStatus.toLowerCase();
-          statusBadge.textContent = newStatus.replace('_', ' ');
-        }
+        // Reload full task details so everything syncs
+        await loadTaskDetail();
       } catch (err) {
         showToast('Error', err.message, 'error');
         // Revert dropdown if update failed
-        loadTaskDetail();
+        await loadTaskDetail();
       }
     });
 
@@ -243,6 +236,67 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('Error', err.message, 'error');
       }
     });
+
+    // ── Load project members for assignment modal ──────────────
+  async function loadProjectMembersForAssignment() {
+    try {
+      // Get the task first to find its projectId
+      const task = await taskAPI.getById(taskId);
+      const project = await projectAPI.getById(task.projectId);
+ 
+      const select = document.getElementById('assigneesSelect');
+      select.innerHTML = project.members.map(m => `
+        <option value="${m.userId}"
+          ${task.assignees && task.assignees.some(a => a.id === m.userId) ? 'selected' : ''}>
+          ${m.user ? m.user.name : 'Unknown'}
+        </option>
+      `).join('');
+    } catch (err) {
+      console.error('Could not load members:', err);
+    }
+  }
+ 
+  // ── Edit Assignees Modal ───────────────────────────────────
+  document.getElementById('editAssigneesBtn')
+    .addEventListener('click', async () => {
+      await loadProjectMembersForAssignment();
+      document.getElementById('assigneesModal').classList.add('show');
+    });
+ 
+  document.getElementById('closeAssigneesModal')
+    .addEventListener('click', () => {
+      document.getElementById('assigneesModal').classList.remove('show');
+    });
+ 
+  document.getElementById('closeAssigneesModal2')
+    .addEventListener('click', () => {
+      document.getElementById('assigneesModal').classList.remove('show');
+    });
+ 
+  document.getElementById('saveAssigneesBtn')
+    .addEventListener('click', async () => {
+      const select = document.getElementById('assigneesSelect');
+      const assigneeIds = Array.from(select.selectedOptions)
+        .map(opt => opt.value);
+ 
+      if (assigneeIds.length === 0) {
+        document.getElementById('assigneesError').textContent =
+          'Select at least one assignee.';
+        document.getElementById('assigneesError').classList.add('show');
+        return;
+      }
+ 
+      try {
+        await taskAPI.assignUsers(taskId, assigneeIds);
+        showToast('Success', 'Assignees updated.', 'success');
+        document.getElementById('assigneesModal').classList.remove('show');
+        await loadTaskDetail();
+      } catch (err) {
+        document.getElementById('assigneesError').textContent = err.message;
+        document.getElementById('assigneesError').classList.add('show');
+      }
+    });
+ 
 
 
   // ── Init ──────────────────────────────────────────
