@@ -304,5 +304,15 @@ function appConfirm(title, message, okLabel = 'Delete') {
 document.addEventListener('DOMContentLoaded', () => {
   renderNotificationPanel();
   renderConfirmDialog();
+  
+  // Wire up notification bell button — attach directly
+  const notifBtn = document.getElementById('notifBtn');
+  if (notifBtn) {
+    notifBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleNotifPanel();
+    });
+  }
 });
 
