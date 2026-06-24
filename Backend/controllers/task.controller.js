@@ -15,7 +15,7 @@ function sanitize(str) {
 // ── CREATE TASK ────────────────────────────────────────
 const createTask = async (req, res) => {
     try {
-      const { title, description, priority, status, dueDate, projectId } = req.body;
+      const { title, description, priority, status, dueDate, projectId, assigneeIds } = req.body;
  
       if (!title) {
         return res.status(400).json({ error: 'Title is required.' });
@@ -55,10 +55,32 @@ const createTask = async (req, res) => {
         projectId,
         createdBy:   req.user.id,
       });
+
+      // Create TaskAssignments if assigneeIds provided
+      if (assigneeIds && assigneeIds.length > 0) {
+        const { TaskAssignment } = require('../models/index');
+        const assignments = assigneeIds.map(userId => ({
+          taskId: task.id,
+          userId
+        }));
+        await TaskAssignment.bulkCreate(assignments);
+      }
+
+      // Reload task with assignees
+      const taskWithAssignees = await Task.findByPk(task.id, {
+        include: [
+          {
+            model: User,
+            as: 'assignees',
+            attributes: ['id', 'name', 'email'],
+            through: { attributes: [] }
+          }
+        ]
+      });
  
       res.status(201).json({
         message: 'Task created successfully.',
-        task,
+        task: taskWithAssignees,
       });
     } catch (err) {
       console.error('createTask error:', err);
