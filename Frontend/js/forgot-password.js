@@ -18,24 +18,23 @@
       const btn = document.getElementById('submitBtn');
       btn.disabled    = true;
       btn.textContent = 'Sending...';
- 
       try {
-        await fetch('http://localhost:5000/api/auth/forgot-password', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email })
-        });
- 
-        // Always show success (backend returns same message
-        // whether email exists or not — security best practice)
-        sucEl.textContent =
-          'If that email exists, a reset link has been sent. Check your inbox.';
-        sucEl.classList.add('show');
-        document.getElementById('email').value = '';
-      } catch (err) {
-        errEl.textContent = 'Something went wrong. Please try again.';
-        errEl.classList.add('show');
-      } finally {
+
+  await authAPI.forgotPassword(email);
+
+  sucEl.textContent =
+    'If that email exists, a reset link has been sent. Check your inbox.';
+  sucEl.classList.add('show');
+
+  document.getElementById('email').value = '';
+
+} catch (err) {
+
+  errEl.textContent = err.message;
+  errEl.classList.add('show');
+
+}
+       finally {
         btn.disabled    = false;
         btn.textContent = 'Send Reset Link';
       }
