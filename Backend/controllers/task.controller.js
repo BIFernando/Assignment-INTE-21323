@@ -14,80 +14,80 @@ function sanitize(str) {
 }
 // ── CREATE TASK ────────────────────────────────────────
 const createTask = async (req, res) => {
-    try {
-      const { title, description, priority, status, dueDate, projectId, assigneeIds } = req.body;
- 
-      if (!title) {
-        return res.status(400).json({ error: 'Title is required.' });
-      }
- 
-      if (!projectId) {
-        return res.status(400).json({ error: 'Project ID is required.' });
-      }
- 
-      // Check user is admin or project_manager in this project
-      const { ProjectMember } = require('../models/index');
-      const membership = await ProjectMember.findOne({
-        where: { projectId, userId: req.user.id }
-      });
- 
-      if (!membership || membership.role === 'collaborator') {
-        return res.status(403).json({
-          error: 'Only project admins and managers can create tasks.'
-        });
-      }
- 
-      if (dueDate) {
-        const due = new Date(dueDate);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        if (due < today) {
-          return res.status(400).json({ error: 'Due date cannot be in the past.' });
-        }
-      }
- 
-      const task = await Task.create({
-        title:       sanitize(title),
-        description: sanitize(description) || null,
-        priority:    priority || 'MEDIUM',
-        status:      status   || 'TODO',
-        dueDate:     dueDate  || null,
-        projectId,
-        createdBy:   req.user.id,
-      });
+  try {
+    const { title, description, priority, status, dueDate, projectId, assigneeIds } = req.body;
 
-      // Create TaskAssignments if assigneeIds provided
-      if (assigneeIds && assigneeIds.length > 0) {
-        const { TaskAssignment } = require('../models/index');
-        const assignments = assigneeIds.map(userId => ({
-          taskId: task.id,
-          userId
-        }));
-        await TaskAssignment.bulkCreate(assignments);
-      }
-
-      // Reload task with assignees
-      const taskWithAssignees = await Task.findByPk(task.id, {
-        include: [
-          {
-            model: User,
-            as: 'assignees',
-            attributes: ['id', 'name', 'email'],
-            through: { attributes: [] }
-          }
-        ]
-      });
- 
-      res.status(201).json({
-        message: 'Task created successfully.',
-        task: taskWithAssignees,
-      });
-    } catch (err) {
-      console.error('createTask error:', err);
-      res.status(500).json({ error: 'Server error.', details: err.message });
+    if (!title) {
+      return res.status(400).json({ error: 'Title is required.' });
     }
-  };
- 
+
+    if (!projectId) {
+      return res.status(400).json({ error: 'Project ID is required.' });
+    }
+
+    // Check user is admin or project_manager in this project
+    const { ProjectMember } = require('../models/index');
+    const membership = await ProjectMember.findOne({
+      where: { projectId, userId: req.user.id }
+    });
+
+    if (!membership || membership.role === 'collaborator') {
+      return res.status(403).json({
+        error: 'Only project admins and managers can create tasks.'
+      });
+    }
+
+    if (dueDate) {
+      const due = new Date(dueDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (due < today) {
+        return res.status(400).json({ error: 'Due date cannot be in the past.' });
+      }
+    }
+
+    const task = await Task.create({
+      title: sanitize(title),
+      description: sanitize(description) || null,
+      priority: priority || 'MEDIUM',
+      status: status || 'TODO',
+      dueDate: dueDate || null,
+      projectId,
+      createdBy: req.user.id,
+    });
+
+    // Create TaskAssignments if assigneeIds provided
+    if (assigneeIds && assigneeIds.length > 0) {
+      const { TaskAssignment } = require('../models/index');
+      const assignments = assigneeIds.map(userId => ({
+        taskId: task.id,
+        userId
+      }));
+      await TaskAssignment.bulkCreate(assignments);
+    }
+
+    // Reload task with assignees
+    const taskWithAssignees = await Task.findByPk(task.id, {
+      include: [
+        {
+          model: User,
+          as: 'assignees',
+          attributes: ['id', 'name', 'email'],
+          through: { attributes: [] }
+        }
+      ]
+    });
+
+    res.status(201).json({
+      message: 'Task created successfully.',
+      task: taskWithAssignees,
+    });
+  } catch (err) {
+    console.error('createTask error:', err);
+    res.status(500).json({ error: 'Server error.', details: err.message });
+  }
+};
+
 // ── GET ALL TASKS ──────────────────────────────────────
 const getAllTasks = async (req, res) => {
   try {
@@ -97,8 +97,8 @@ const getAllTasks = async (req, res) => {
     if (status) where.status = status;
     if (priority) where.priority = priority;
     if (req.query.projectId) {
-  where.projectId = req.query.projectId;
-}
+      where.projectId = req.query.projectId;
+    }
 
 
     const tasks = await Task.findAll({
@@ -175,42 +175,42 @@ const updateTask = async (req, res) => {
       await task.update({ status });
       return res.status(200).json({ message: 'Task status updated.' });
     }
-await task.update({
-  title,
-  description,
-  priority,
-  status,
-  dueDate
-});
+    await task.update({
+      title,
+      description,
+      priority,
+      status,
+      dueDate
+    });
 
-// Load task with assignees
-const taskWithAssignees = await Task.findByPk(id, {
-  include: [
-    {
-      model: User,
-      as: 'assignees'
+    // Load task with assignees
+    const taskWithAssignees = await Task.findByPk(id, {
+      include: [
+        {
+          model: User,
+          as: 'assignees'
+        }
+      ]
+    });
+
+    const io = req.app.get('io');
+
+    if (taskWithAssignees && taskWithAssignees.assignees) {
+
+      for (const assignee of taskWithAssignees.assignees) {
+
+        await createNotification(
+          io,
+          assignee.id,
+          'Task "' + task.title + '" status changed to ' + status,
+          'STATUS_CHANGE'
+        );
+      }
     }
-  ]
-});
 
-const io = req.app.get('io');
-
-if (taskWithAssignees && taskWithAssignees.assignees) {
-
-  for (const assignee of taskWithAssignees.assignees) {
-
-    await createNotification(
-      io,
-      assignee.id,
-      'Task "' + task.title + '" status changed to ' + status,
-      'STATUS_CHANGE'
-    );
-  }
-}
-
-res.status(200).json({
-  message: 'Task updated successfully.'
-});
+    res.status(200).json({
+      message: 'Task updated successfully.'
+    });
 
 
   } catch (err) {
@@ -220,32 +220,32 @@ res.status(200).json({
 
 // ── DELETE TASK ────────────────────────────────────────
 const deleteTask = async (req, res) => {
-    try {
-      const { id } = req.params;
-      const task = await Task.findByPk(id);
-      if (!task) {
-        return res.status(404).json({ error: 'Task not found.' });
-      }
- 
-      // Check user is project admin or manager
-      const { ProjectMember } = require('../models/index');
-      const membership = await ProjectMember.findOne({
-        where: { projectId: task.projectId, userId: req.user.id }
-      });
- 
-      if (!membership || membership.role === 'collaborator') {
-        return res.status(403).json({
-          error: 'Only project admins and managers can delete tasks.'
-        });
-      }
- 
-      await task.destroy();
-      res.status(200).json({ message: 'Task deleted successfully.' });
-    } catch (err) {
-      console.error('deleteTask error:', err);
-      res.status(500).json({ error: 'Server error.', details: err.message });
+  try {
+    const { id } = req.params;
+    const task = await Task.findByPk(id);
+    if (!task) {
+      return res.status(404).json({ error: 'Task not found.' });
     }
-  };
+
+    // Check user is project admin or manager
+    const { ProjectMember } = require('../models/index');
+    const membership = await ProjectMember.findOne({
+      where: { projectId: task.projectId, userId: req.user.id }
+    });
+
+    if (!membership || membership.role === 'collaborator') {
+      return res.status(403).json({
+        error: 'Only project admins and managers can delete tasks.'
+      });
+    }
+
+    await task.destroy();
+    res.status(200).json({ message: 'Task deleted successfully.' });
+  } catch (err) {
+    console.error('deleteTask error:', err);
+    res.status(500).json({ error: 'Server error.', details: err.message });
+  }
+};
 
 // ── ASSIGN USERS TO TASK ───────────────────────────────
 const assignUsers = async (req, res) => {
@@ -257,9 +257,22 @@ const assignUsers = async (req, res) => {
       return res.status(400).json({ error: 'No user IDs provided.' });
     }
 
+    // Find the task and get its project
     const task = await Task.findByPk(id);
     if (!task) {
       return res.status(404).json({ error: 'Task not found.' });
+    }
+
+    // Check permission: only admin/project_manager can assign
+    const { ProjectMember } = require('../models/index');
+    const membership = await ProjectMember.findOne({
+      where: { projectId: task.projectId, userId: req.user.id }
+    });
+
+    if (!membership || membership.role === 'collaborator') {
+      return res.status(403).json({
+        error: 'Only project admins and managers can assign tasks.'
+      });
     }
 
     const users = await User.findAll({ where: { id: userIds } });
@@ -273,9 +286,11 @@ const assignUsers = async (req, res) => {
 
     res.status(200).json({ message: 'Task assigned successfully.' });
   } catch (err) {
+    console.error('assignUsers error:', err);
     res.status(500).json({ error: 'Server error.', details: err.message });
   }
 };
+
 
 module.exports = {
   createTask,
