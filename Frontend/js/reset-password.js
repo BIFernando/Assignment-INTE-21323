@@ -40,38 +40,30 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.disabled    = true;
       btn.textContent = 'Resetting...';
  
-      try {
-        await fetch('/api/auth/reset-password-token', {
-         method: 'POST',
-          headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({ token, newPassword })
-});
-        const data = await res.json();
- 
-        if (!res.ok) {
-          errEl.textContent = data.message || 'Reset failed.';
-          errEl.classList.add('show');
-          btn.disabled    = false;
-          btn.textContent = 'Reset Password';
-          return;
-        }
- 
-        sucEl.textContent =
-          'Password reset! Redirecting to login...';
-        sucEl.classList.add('show');
- 
-        setTimeout(() => {
-          window.location.href = 'login.html';
-        }, 2000);
- 
-      } catch (err) {
-        errEl.textContent = 'Something went wrong. Please try again.';
-        errEl.classList.add('show');
-        btn.disabled    = false;
-        btn.textContent = 'Reset Password';
-      }
+  try {
+
+  await authAPI.resetPasswordWithToken(token, newPassword);
+
+  sucEl.textContent = 'Password reset! Redirecting to login...';
+  sucEl.classList.add('show');
+
+  setTimeout(() => {
+    window.location.href = 'login.html';
+  }, 2000);
+
+} catch (err) {
+
+  console.error(err);
+
+  errEl.textContent =
+    err.message || 'Something went wrong. Please try again.';
+
+  errEl.classList.add('show');
+
+  btn.disabled = false;
+  btn.textContent = 'Reset Password';
+
+}
     });
  
   });
