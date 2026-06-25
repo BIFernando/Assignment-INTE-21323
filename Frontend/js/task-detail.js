@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
   requireAuth();
   renderSidebar('tasks');
 
+  const user = getCurrentUser();
+
   const params = new URLSearchParams(window.location.search);
   const taskId = params.get('id');
   if (!taskId) {
@@ -10,49 +12,49 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-    async function loadTaskDetail() {
-      try {
-        const task = await taskAPI.getById(taskId);
+  async function loadTaskDetail() {
+    try {
+      const task = await taskAPI.getById(taskId);
 
-        document.getElementById('taskTitle').textContent = task.title;
-        document.getElementById('taskDescription').textContent =
-          task.description || 'No description.';
-        document.getElementById('taskMeta').innerHTML =
-          `<span class="badge badge-${task.priority.toLowerCase()}">${task.priority}</span>
+      document.getElementById('taskTitle').textContent = task.title;
+      document.getElementById('taskDescription').textContent =
+        task.description || 'No description.';
+      document.getElementById('taskMeta').innerHTML =
+        `<span class="badge badge-${task.priority.toLowerCase()}">${task.priority}</span>
            &nbsp; Due: ${task.dueDate
-             ? new Date(task.dueDate).toLocaleDateString() : 'No deadline'}`;
+          ? new Date(task.dueDate).toLocaleDateString() : 'No deadline'}`;
 
-        // Assignees list
-        const assignees = task.assignees && task.assignees.length > 0
-          ? task.assignees.map(a => a.name).join(', ')
-          : 'Unassigned';
-        document.getElementById('taskAssignees').innerHTML =
-          '<strong>Assigned to:</strong> ' + assignees;
+      // Assignees list
+      const assignees = task.assignees && task.assignees.length > 0
+        ? task.assignees.map(a => a.name).join(', ')
+        : 'Unassigned';
+      document.getElementById('taskAssignees').innerHTML =
+        '<strong>Assigned to:</strong> ' + assignees;
 
-        // Status dropdown — all roles can update status
-        document.getElementById('statusSelector').innerHTML = `
+      // Status dropdown — all roles can update status
+      document.getElementById('statusSelector').innerHTML = `
           <select class="btn btn-secondary btn-sm" id="statusSelect">
-            <option value="TODO"        ${task.status==='TODO'?'selected':''}>To Do</option>
-            <option value="IN_PROGRESS" ${task.status==='IN_PROGRESS'?'selected':''}>In Progress</option>
-            <option value="COMPLETED"   ${task.status==='COMPLETED'?'selected':''}>Completed</option>
+            <option value="TODO"        ${task.status === 'TODO' ? 'selected' : ''}>To Do</option>
+            <option value="IN_PROGRESS" ${task.status === 'IN_PROGRESS' ? 'selected' : ''}>In Progress</option>
+            <option value="COMPLETED"   ${task.status === 'COMPLETED' ? 'selected' : ''}>Completed</option>
           </select>
         `;
-        document.getElementById('statusSelect')
-    .addEventListener('change', async (e) => {
-      const newStatus = e.target.value;
-      try {
-        await taskAPI.update(taskId, { status: newStatus });
-        showToast('Success', 'Status updated to ' +
-          newStatus.replace('_', ' ') + '.', 'success');
- 
-        // Reload full task details so everything syncs
-        await loadTaskDetail();
-      } catch (err) {
-        showToast('Error', err.message, 'error');
-        // Revert dropdown if update failed
-        await loadTaskDetail();
-      }
-    });
+      document.getElementById('statusSelect')
+        .addEventListener('change', async (e) => {
+          const newStatus = e.target.value;
+          try {
+            await taskAPI.update(taskId, { status: newStatus });
+            showToast('Success', 'Status updated to ' +
+              newStatus.replace('_', ' ') + '.', 'success');
+
+            // Reload full task details so everything syncs
+            await loadTaskDetail();
+          } catch (err) {
+            showToast('Error', err.message, 'error');
+            // Revert dropdown if update failed
+            await loadTaskDetail();
+          }
+        });
 
     } catch (err) {
       document.getElementById('pageError').textContent = err.message;
@@ -93,8 +95,8 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="sidebar-avatar"
                style="width:32px; height:32px; font-size:12px; flex-shrink:0;">
             ${c.author
-              ? c.author.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2)
-              : '?'}
+          ? c.author.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+          : '?'}
           </div>
           <div style="flex:1; min-width:0;">
             <div style="display:flex; justify-content:space-between;
@@ -132,8 +134,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Time Ago Helper ───────────────────────────────
   function timeAgo(dateStr) {
     const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
-    if (diff < 60)    return 'Just now';
-    if (diff < 3600)  return Math.floor(diff / 60) + 'm ago';
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
     if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
     return Math.floor(diff / 86400) + 'd ago';
   }
@@ -155,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
   // ── Delete Comment ────────────────────────────────
-  window.deleteComment = async function(id) {
+  window.deleteComment = async function (id) {
     const ok = await appConfirm(
       'Delete Comment?',
       'This cannot be undone.',
@@ -178,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
       loadComments();
     });
 
-  window.closeComments = function() {
+  window.closeComments = function () {
     document.getElementById('commentsPanel').classList.remove('open');
     document.getElementById('commentsOverlay').classList.remove('open');
   };
@@ -237,13 +239,13 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // ── Load project members for assignment modal ──────────────
+  // ── Load project members for assignment modal ──────────────
   async function loadProjectMembersForAssignment() {
     try {
       // Get the task first to find its projectId
       const task = await taskAPI.getById(taskId);
       const project = await projectAPI.getById(task.projectId);
- 
+
       const select = document.getElementById('assigneesSelect');
       select.innerHTML = project.members.map(m => `
         <option value="${m.userId}"
@@ -255,37 +257,42 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('Could not load members:', err);
     }
   }
- 
+
   // ── Edit Assignees Modal ───────────────────────────────────
-  document.getElementById('editAssigneesBtn')
-    .addEventListener('click', async () => {
+  const editAssigneesBtn = document.getElementById('editAssigneesBtn');
+
+  if (user.role === 'collaborator') {
+    editAssigneesBtn.style.display = 'none';
+  } else {
+    editAssigneesBtn.addEventListener('click', async () => {
       await loadProjectMembersForAssignment();
       document.getElementById('assigneesModal').classList.add('show');
     });
- 
+  }
+
   document.getElementById('closeAssigneesModal')
     .addEventListener('click', () => {
       document.getElementById('assigneesModal').classList.remove('show');
     });
- 
+
   document.getElementById('closeAssigneesModal2')
     .addEventListener('click', () => {
       document.getElementById('assigneesModal').classList.remove('show');
     });
- 
+
   document.getElementById('saveAssigneesBtn')
     .addEventListener('click', async () => {
       const select = document.getElementById('assigneesSelect');
       const assigneeIds = Array.from(select.selectedOptions)
         .map(opt => opt.value);
- 
+
       if (assigneeIds.length === 0) {
         document.getElementById('assigneesError').textContent =
           'Select at least one assignee.';
         document.getElementById('assigneesError').classList.add('show');
         return;
       }
- 
+
       try {
         await taskAPI.assignUsers(taskId, assigneeIds);
         showToast('Success', 'Assignees updated.', 'success');
@@ -296,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('assigneesError').classList.add('show');
       }
     });
- 
+
 
 
   // ── Init ──────────────────────────────────────────

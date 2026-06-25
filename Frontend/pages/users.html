@@ -1,5 +1,4 @@
-
-    <!DOCTYPE html>
+<!DOCTYPE html>
 
 
 
@@ -64,6 +63,11 @@
 
       <!-- Topbar -->
       <div class="topbar">
+        <button class="hamburger-btn" id="hamburgerBtn" style="display:none; align-items:center; justify-content:center;
+           background:none; border:none; cursor:pointer;
+           padding:8px; color:var(--text);" onclick="document.querySelector('.sidebar').classList.toggle('open')">
+          <i class="bi bi-list" style="font-size:24px;"></i>
+        </button>
         <div>
           <div class="topbar-title">User Management</div>
           <div class="topbar-subtitle">
@@ -85,7 +89,7 @@
 
       <div class="alert success" id="successAlert"></div>
       <div class="alert error" id="errorAlert"></div>
-
+      <div class="table-responsive"></div>
       <table class="data-table">
         <thead>
           <tr>
@@ -103,20 +107,18 @@
           </tr>
         </tbody>
       </table>
-
     </div>
+  </div>
 
 
   </div>
 
-  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>  <!-- MUST be first -->
-<script src="../js/api.js"></script>
-<script src="../js/auth.js"></script>
-<script src="../js/socket.js"></script>
-<script src="../js/users.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script> <!-- MUST be first -->
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/socket.js"></script>
+  <script src="../js/users.js"></script>
 
 </body>
 
 </html>
-
-
