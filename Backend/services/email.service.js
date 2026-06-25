@@ -29,7 +29,8 @@ const nodemailer = require('nodemailer');
 
     const sendPasswordResetEmail = async (toEmail, name, token) => {
     // Update this URL to your actual frontend URL when deployed
-    const resetUrl = 'http://127.0.0.1:5500/pages/reset-password.html?token=' + token;
+    const resetUrl =
+    `${process.env.CLIENT_URL}/pages/reset-password.html?token=${token}`;
  
     await transporter.sendMail({
       from: '"TMS System" <no-reply@tms.com>',
