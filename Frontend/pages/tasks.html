@@ -1,6 +1,6 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/components.css">
 </head>
+
 <body>
 
   <!-- Create Task Modal -->
@@ -50,15 +51,14 @@
       </div>
 
       <div class="form-group">
-    <label>Assign To (optional)</label>
-    <select id="taskAssignees" class="form-control" multiple
-            style="min-height:100px;">
-      <!-- populated dynamically -->
-    </select>
-    <span style="font-size:12px; color:var(--text-muted);">
-      Hold Ctrl (Windows) or Cmd (Mac) to select multiple people.
-    </span>
-  </div>
+        <label>Assign To (optional)</label>
+        <select id="taskAssignees" class="form-control" multiple style="min-height:100px;">
+          <!-- populated dynamically -->
+        </select>
+        <span style="font-size:12px; color:var(--text-muted);">
+          Hold Ctrl (Windows) or Cmd (Mac) to select multiple people.
+        </span>
+      </div>
 
       <button class="btn btn-primary" id="saveTaskBtn" style="width:100%;">
         Create Task
@@ -72,6 +72,11 @@
 
       <!-- Topbar -->
       <div class="topbar">
+        <button class="hamburger-btn" id="hamburgerBtn" style="display:none; align-items:center; justify-content:center;
+           background:none; border:none; cursor:pointer;
+           padding:8px; color:var(--text);" onclick="document.querySelector('.sidebar').classList.toggle('open')">
+          <i class="bi bi-list" style="font-size:24px;"></i>
+        </button>
         <div>
           <div class="topbar-title">Tasks</div>
           <div class="topbar-subtitle">Manage and track project tasks</div>
@@ -97,6 +102,7 @@
 
       <!-- LIST VIEW -->
       <div id="listView">
+        <div class="table-responsive"></div>
         <table class="data-table">
           <thead>
             <tr>
@@ -115,51 +121,52 @@
           </tbody>
         </table>
       </div>
+    </div>
 
-      <!-- KANBAN VIEW -->
-      <div id="kanbanView" style="display:none;">
-        <div class="kanban-board">
+    <!-- KANBAN VIEW -->
+    <div id="kanbanView" style="display:none;">
+      <div class="kanban-board">
 
-          <div class="kanban-column col-todo">
-            <div class="kanban-header">
-              <div class="kanban-header-left">
-                <div class="kanban-dot"></div>
-                <span class="kanban-col-title">To Do</span>
-              </div>
-              <span class="kanban-count" id="count-TODO">0</span>
+        <div class="kanban-column col-todo">
+          <div class="kanban-header">
+            <div class="kanban-header-left">
+              <div class="kanban-dot"></div>
+              <span class="kanban-col-title">To Do</span>
             </div>
-            <div class="kanban-cards" id="cards-TODO"></div>
+            <span class="kanban-count" id="count-TODO">0</span>
           </div>
-
-          <div class="kanban-column col-progress">
-            <div class="kanban-header">
-              <div class="kanban-header-left">
-                <div class="kanban-dot"></div>
-                <span class="kanban-col-title">In Progress</span>
-              </div>
-              <span class="kanban-count" id="count-IN_PROGRESS">0</span>
-            </div>
-            <div class="kanban-cards" id="cards-IN_PROGRESS"></div>
-          </div>
-
-          <div class="kanban-column col-done">
-            <div class="kanban-header">
-              <div class="kanban-header-left">
-                <div class="kanban-dot"></div>
-                <span class="kanban-col-title">Completed</span>
-              </div>
-              <span class="kanban-count" id="count-COMPLETED">0</span>
-            </div>
-            <div class="kanban-cards" id="cards-COMPLETED"></div>
-          </div>
-
+          <div class="kanban-cards" id="cards-TODO"></div>
         </div>
+
+        <div class="kanban-column col-progress">
+          <div class="kanban-header">
+            <div class="kanban-header-left">
+              <div class="kanban-dot"></div>
+              <span class="kanban-col-title">In Progress</span>
+            </div>
+            <span class="kanban-count" id="count-IN_PROGRESS">0</span>
+          </div>
+          <div class="kanban-cards" id="cards-IN_PROGRESS"></div>
+        </div>
+
+        <div class="kanban-column col-done">
+          <div class="kanban-header">
+            <div class="kanban-header-left">
+              <div class="kanban-dot"></div>
+              <span class="kanban-col-title">Completed</span>
+            </div>
+            <span class="kanban-count" id="count-COMPLETED">0</span>
+          </div>
+          <div class="kanban-cards" id="cards-COMPLETED"></div>
+        </div>
+
+      </div>
 
 
     </div>
   </div>
 
-</div>
+  </div>
 
 
   </div>
@@ -169,15 +176,14 @@
 
 
 
-  <!-- Scripts — order matters -->
+  <!-- Scripts -->
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-<script src="../js/api.js"></script>
-<script src="../js/auth.js"></script>
-<script src="../js/socket.js"></script>
-<script src="../js/tasks.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/socket.js"></script>
+  <script src="../js/tasks.js"></script>
 </body>
+
 </html>
-
-

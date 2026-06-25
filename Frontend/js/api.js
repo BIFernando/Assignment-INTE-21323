@@ -59,6 +59,13 @@ const authAPI = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, newPassword }),
     }).then(handleResponse),
+
+  changePassword: (currentPassword, newPassword) =>
+    fetch(API_BASE + '/auth/change-password', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ currentPassword, newPassword }),
+    }).then(handleResponse),
 };
 
 // ── USERS ──────────────────────────────────────
