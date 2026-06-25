@@ -30,7 +30,11 @@
 
 } catch (err) {
 
-  errEl.textContent = err.message;
+  console.error(err);
+
+  errEl.textContent =
+    err.message || 'Something went wrong. Please try again.';
+
   errEl.classList.add('show');
 
 }
