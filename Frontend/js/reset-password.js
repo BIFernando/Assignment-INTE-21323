@@ -41,14 +41,13 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.textContent = 'Resetting...';
  
       try {
-        const res = await fetch(
-          'http://localhost:5000/api/auth/reset-password-token',
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token, newPassword })
-          }
-        );
+        await fetch('/api/auth/reset-password-token', {
+         method: 'POST',
+          headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({ token, newPassword })
+});
         const data = await res.json();
  
         if (!res.ok) {

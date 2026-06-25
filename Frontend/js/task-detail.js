@@ -205,9 +205,9 @@ document.addEventListener('DOMContentLoaded', () => {
           <i class="bi bi-file-earmark"
              style="color:var(--primary); font-size:18px;"></i>
           <span style="font-size:14px; flex:1;">${f.fileName}</span>
-          <a href="${f.fileUrl}"
-             target="_blank"
-             class="btn btn-secondary btn-sm">
+          <a href="/${f.fileUrl.replace(/^\/+/, '')}"
+            target="_blank"
+            class="btn btn-secondary btn-sm">
             <i class="bi bi-eye"></i> View
           </a>
         </div>

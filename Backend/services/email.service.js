@@ -91,7 +91,9 @@ const nodemailer = require('nodemailer');
     });
   };
     const sendPasswordResetEmail = async (toEmail, name, token) => {
-    const resetUrl = 'https://taskflowtms.sytes.net/pages/reset-password.html?token=' + token;
+    // Update this URL to your actual frontend URL when deployed
+    const resetUrl =
+    `${process.env.CLIENT_URL}/pages/reset-password.html?token=${token}`;
  
     await transporter.sendMail({
       from: '"TaskFlow TMS" <no-reply@taskflow.com>',

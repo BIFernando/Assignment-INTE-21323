@@ -170,4 +170,30 @@ router.post('/reset-password', verifyToken, resetPasswordValidation, validate, r
 // POST /api/auth/register
 router.post("/register", registerValidation, validate, register);
 router.post('/change-password', verifyToken, changePassword);
+
+// Forgot password
+router.post(
+  '/forgot-password',
+  body('email')
+    .isEmail()
+    .withMessage('Valid email is required.'),
+  validate,
+  forgotPassword
+);
+
+// Reset password using email token
+router.post(
+  '/reset-password-token',
+  body('token').notEmpty().withMessage('Token is required.'),
+  body('newPassword')
+    .isLength({ min: 8 })
+    .withMessage('Password must be at least 8 characters.')
+    .matches(/[A-Z]/)
+    .withMessage('Password must contain an uppercase letter.')
+    .matches(/[0-9]/)
+    .withMessage('Password must contain a number.'),
+  validate,
+  resetPasswordWithToken
+);
+
 module.exports = router;
