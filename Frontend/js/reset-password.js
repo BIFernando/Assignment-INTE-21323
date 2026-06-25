@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         await fetch('/api/auth/reset-password-token', {
          method: 'POST',
-          headers: {
+         headers: {
     'Content-Type': 'application/json'
   },
   body: JSON.stringify({ token, newPassword })
@@ -67,11 +67,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 2000);
  
       } catch (err) {
-        errEl.textContent = 'Something went wrong. Please try again.';
-        errEl.classList.add('show');
-        btn.disabled    = false;
-        btn.textContent = 'Reset Password';
-      }
+  console.error(err);
+
+  errEl.textContent =
+    err.message || 'Something went wrong. Please try again.';
+
+  errEl.classList.add('show');
+
+  btn.disabled = false;
+  btn.textContent = 'Reset Password';
+}
     });
  
   });
