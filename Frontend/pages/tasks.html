@@ -121,49 +121,47 @@
           </tbody>
         </table>
       </div>
-    </div>
 
-    <!-- KANBAN VIEW -->
-    <div id="kanbanView" style="display:none;">
-      <div class="kanban-board">
+      <!-- KANBAN VIEW -->
+      <div id="kanbanView" style="display:none;">
+        <div class="kanban-board">
 
-        <div class="kanban-column col-todo">
-          <div class="kanban-header">
-            <div class="kanban-header-left">
-              <div class="kanban-dot"></div>
-              <span class="kanban-col-title">To Do</span>
+          <div class="kanban-column col-todo">
+            <div class="kanban-header">
+              <div class="kanban-header-left">
+                <div class="kanban-dot"></div>
+                <span class="kanban-col-title">To Do</span>
+              </div>
+              <span class="kanban-count" id="count-TODO">0</span>
             </div>
-            <span class="kanban-count" id="count-TODO">0</span>
+            <div class="kanban-cards" id="cards-TODO"></div>
           </div>
-          <div class="kanban-cards" id="cards-TODO"></div>
-        </div>
 
-        <div class="kanban-column col-progress">
-          <div class="kanban-header">
-            <div class="kanban-header-left">
-              <div class="kanban-dot"></div>
-              <span class="kanban-col-title">In Progress</span>
+          <div class="kanban-column col-progress">
+            <div class="kanban-header">
+              <div class="kanban-header-left">
+                <div class="kanban-dot"></div>
+                <span class="kanban-col-title">In Progress</span>
+              </div>
+              <span class="kanban-count" id="count-IN_PROGRESS">0</span>
             </div>
-            <span class="kanban-count" id="count-IN_PROGRESS">0</span>
+            <div class="kanban-cards" id="cards-IN_PROGRESS"></div>
           </div>
-          <div class="kanban-cards" id="cards-IN_PROGRESS"></div>
-        </div>
 
-        <div class="kanban-column col-done">
-          <div class="kanban-header">
-            <div class="kanban-header-left">
-              <div class="kanban-dot"></div>
-              <span class="kanban-col-title">Completed</span>
+          <div class="kanban-column col-done">
+            <div class="kanban-header">
+              <div class="kanban-header-left">
+                <div class="kanban-dot"></div>
+                <span class="kanban-col-title">Completed</span>
+              </div>
+              <span class="kanban-count" id="count-COMPLETED">0</span>
             </div>
-            <span class="kanban-count" id="count-COMPLETED">0</span>
+            <div class="kanban-cards" id="cards-COMPLETED"></div>
           </div>
-          <div class="kanban-cards" id="cards-COMPLETED"></div>
-        </div>
 
+        </div>
       </div>
     </div>
-  </div>
-  </div>
   </div>
 
   <!-- Scripts -->

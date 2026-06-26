@@ -174,6 +174,12 @@ const taskAPI = {
       headers: authHeaders(),
     }).then(handleResponse),
 
+  deleteAttachment: (taskId, attachmentId) =>
+    fetch(API_BASE + '/tasks/' + taskId + '/attachments/' + attachmentId, {
+      method: 'DELETE',
+      headers: authHeaders(),
+    }).then(handleResponse),
+
   assignUsers: (taskId, userIds) =>
     fetch(API_BASE + '/tasks/' + taskId + '/assign', {
       method: 'POST',
