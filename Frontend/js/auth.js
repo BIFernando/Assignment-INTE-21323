@@ -222,16 +222,22 @@ async function loadNotifications() {
 
     // Mark as read when panel opens
     notifications.filter(n => !n.isRead).forEach(n => {
-      notificationAPI.markRead(n.id).catch(() => { });
+      notificationAPI.markAsRead(n.id).catch(() => { });
     });
 
     // Update badge to 0
     const badge = document.getElementById('notifBadge');
     if (badge) badge.style.display = 'none';
 
-  } catch (err) {
-    list.innerHTML = `<div class="notif-empty">Could not load notifications.</div>`;
-  }
+  }catch (err) {
+    console.error(err);
+
+    list.innerHTML = `
+        <div class="notif-empty">
+            ${err.message}
+        </div>
+    `;
+}
 }
 
 async function markAllRead() {
