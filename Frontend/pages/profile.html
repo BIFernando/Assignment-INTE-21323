@@ -75,49 +75,56 @@
           </span>
         </div>
 
-        <!-- Member since -->
-        <div class="form-group">
-          <label>Member Since</label>
-          <input type="text" id="joinedInput" class="form-control" disabled
-            style="background:var(--bg); cursor:not-allowed;">
-        </div>
-
         <button class="btn btn-primary" id="saveProfileBtn">
           <i class="bi bi-check2"></i> Save Changes
         </button>
-        <!-- Change Password Section -->
-        <div style="margin-top:32px; padding-top:24px; border-top:1px solid var(--border-light);">
-          <div style="font-size:16px; font-weight:600; margin-bottom:16px;">
-            Change Password
-          </div>
 
-          <div class="form-group">
-            <label>Current Password</label>
-            <input type="password" id="currentPasswordInput" class="form-control"
-              placeholder="Enter your current password">
-          </div>
+        <button class="btn btn-secondary" id="changePasswordBtn">
+          <i class="bi bi-lock"></i> Change Password
+        </button>
+        <!-- Change Password Modal -->
+        <div class="modal-overlay" id="changePasswordModal">
+          <div class="modal">
+            <div class="modal-header">
+              <span class="modal-title">Change Password</span>
+              <span class="modal-close" id="closeChangePasswordModal">&times;</span>
+            </div>
+            <div class="alert error" id="changePasswordError"></div>
+            <div class="form-group">
+              <label>Current Password</label>
+              <input type="password" id="currentPasswordInput" class="form-control"
+                placeholder="Enter your current password">
+            </div>
 
-          <div class="form-group">
-            <label>New Password</label>
-            <input type="password" id="newPasswordInput" class="form-control" placeholder="Enter new password">
-            <span style="font-size:12px; color:var(--text-muted);">
-              Minimum 8 characters, include uppercase, lowercase, and number
-            </span>
-          </div>
+            <div class="form-group">
+              <label>New Password</label>
+              <input type="password" id="newPasswordInput" class="form-control" placeholder="Enter new password">
+              <span style="font-size:12px; color:var(--text-muted);">
+                Minimum 8 characters, include uppercase, lowercase, and number
+              </span>
+            </div>
 
-          <div class="form-group">
-            <label>Confirm New Password</label>
-            <input type="password" id="confirmPasswordInput" class="form-control" placeholder="Confirm new password">
-          </div>
+            <div class="form-group">
+              <label>Confirm New Password</label>
+              <input type="password" id="confirmPasswordInput" class="form-control" placeholder="Confirm new password">
+            </div>
 
-          <button class="btn btn-secondary" id="changePasswordBtn">
-            <i class="bi bi-lock"></i> Change Password
-          </button>
+            <div style="display:flex; gap:10px;">
+              <button class="btn btn-primary" id="saveChangePasswordBtn" style="flex:1;">
+                <i class="bi bi-check2"></i> Change Password
+              </button>
+              <button class="btn btn-ghost" id="cancelChangePasswordBtn" style="flex:1;">
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
 
       </div>
 
     </div>
+
+  </div>
   </div>
 
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>

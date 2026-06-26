@@ -31,30 +31,78 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('taskAssignees').innerHTML =
         '<strong>Assigned to:</strong> ' + assignees;
 
-      // Status dropdown — all roles can update status
-      document.getElementById('statusSelector').innerHTML = `
-          <select class="btn btn-secondary btn-sm" id="statusSelect">
-            <option value="TODO"        ${task.status === 'TODO' ? 'selected' : ''}>To Do</option>
-            <option value="IN_PROGRESS" ${task.status === 'IN_PROGRESS' ? 'selected' : ''}>In Progress</option>
-            <option value="COMPLETED"   ${task.status === 'COMPLETED' ? 'selected' : ''}>Completed</option>
-          </select>
-        `;
-      document.getElementById('statusSelect')
-        .addEventListener('change', async (e) => {
-          const newStatus = e.target.value;
-          try {
-            await taskAPI.update(taskId, { status: newStatus });
-            showToast('Success', 'Status updated to ' +
-              newStatus.replace('_', ' ') + '.', 'success');
+      const statusSelector = document.getElementById('statusSelector');
+  
+  // Create dropdown HTML
+  const dropdownHTML = `
+    <select class="btn btn-secondary btn-sm" id="statusSelect">
+      <option value="TODO" ${task.status === 'TODO' ? 'selected' : ''}>To Do</option>
+      <option value="IN_PROGRESS" ${task.status === 'IN_PROGRESS' ? 'selected' : ''}>In Progress</option>
+      <option value="COMPLETED" ${task.status === 'COMPLETED' ? 'selected' : ''}>Completed</option>
+    </select>
+  `;
+  
+  // Only update if dropdown doesn't exist
+  if (!statusSelector.querySelector('#statusSelect')) {
+    statusSelector.innerHTML = dropdownHTML;
+    
+    // Add listener only once
+    document.getElementById('statusSelect')
+      .addEventListener('change', async (e) => {
+        const newStatus = e.target.value;
+        const dropdown = document.getElementById('statusSelect');
+        const originalValue = dropdown.value;
+        
+        try {
+          dropdown.disabled = true;
+          await taskAPI.update(taskId, { status: newStatus });
+          await new Promise(resolve => setTimeout(resolve, 200));
+          showToast('Success', 'Status updated to ' +
+            newStatus.replace('_', ' ') + '.', 'success');
+          await loadTaskDetail();
+        } catch (err) {
+          dropdown.value = originalValue;
+          showToast('Error', err.message, 'error');
+        } finally {
+          dropdown.disabled = false;
+        }
+      });
+  } else {
+    // Just update the selected value without recreating
+    document.getElementById('statusSelect').value = task.status;
+  }
 
-            // Reload full task details so everything syncs
-            await loadTaskDetail();
-          } catch (err) {
-            showToast('Error', err.message, 'error');
-            // Revert dropdown if update failed
-            await loadTaskDetail();
-          }
-        });
+      document.getElementById('statusSelect')
+    .addEventListener('change', async (e) => {
+      const newStatus = e.target.value;
+      const dropdown = document.getElementById('statusSelect');
+      
+      // Store original value in case of error
+      const originalValue = dropdown.value;
+      
+      try {
+        // Disable dropdown while updating
+        dropdown.disabled = true;
+        
+        await taskAPI.update(taskId, { status: newStatus });
+        
+        // Wait a moment for backend to fully process
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        showToast('Success', 'Status updated to ' +
+          newStatus.replace('_', ' ') + '.', 'success');
+
+        // Reload the entire task detail
+        await loadTaskDetail();
+      } catch (err) {
+        // Revert to original value
+        dropdown.value = originalValue;
+        showToast('Error', err.message, 'error');
+      } finally {
+        dropdown.disabled = false;
+      }
+    });
+
 
     } catch (err) {
       document.getElementById('pageError').textContent = err.message;
