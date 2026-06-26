@@ -60,7 +60,7 @@ const emailLayout = (content) => `
 </html>`;
 
 const sendWelcomeEmail = async (toEmail, name, tempPassword) => {
-  const loginUrl = `${APP_URL}/pages/login.html`;
+  const loginUrl = `${APP_URL}/pages/login.html?welcome=1&email=${encodeURIComponent(toEmail)}`;
   const safeName = escape(name);
   const safeEmail = escape(toEmail);
   const safePassword = escape(tempPassword);

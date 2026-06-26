@@ -75,6 +75,20 @@ const createTask = async (req, res) => {
       ]
     });
 
+    const io = req.app.get('io');
+
+    if (taskWithAssignees && taskWithAssignees.assignees) {
+      for (const assignee of taskWithAssignees.assignees) {
+        if (assignee.id === req.user.id) continue;
+        await createNotification(
+          io,
+          assignee.id,
+          'You have been assigned to task "' + task.title + '"',
+          'ASSIGNMENT'
+        );
+      }
+    }
+
     res.status(201).json({
       message: 'Task created successfully.',
       task: taskWithAssignees,

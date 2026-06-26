@@ -290,8 +290,27 @@
 
   <script src="../js/api.js"></script>
   <script>
-    if (localStorage.getItem('token')) {
-      window.location.href = 'dashboard.html';
+    const loginParams = new URLSearchParams(window.location.search);
+    const isWelcomeLogin = loginParams.get('welcome') === '1';
+
+    if (isWelcomeLogin) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      const welcomeEmail = loginParams.get('email');
+      if (welcomeEmail) {
+        document.getElementById('email').value = welcomeEmail;
+      }
+    }
+
+    function getPostLoginRedirect(data) {
+      if (data.isFirstLogin) return 'profile.html';
+      if (data.user && data.user.role === 'admin') return 'dashboard.html';
+      return 'projects.html';
+    }
+
+    if (localStorage.getItem('token') && !isWelcomeLogin) {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      window.location.href = user.role === 'admin' ? 'dashboard.html' : 'projects.html';
     }
 
     document.getElementById('loginBtn').addEventListener('click', async () => {
@@ -327,7 +346,7 @@
         // Clear fields
         document.getElementById('email').value = '';
         document.getElementById('password').value = '';
-        window.location.href = 'dashboard.html';
+        window.location.href = getPostLoginRedirect(data);
       } catch (err) {
         errAlert.innerHTML = '<i class="bi bi-exclamation-circle"></i> ' + err.message;
         errAlert.classList.add('show');
