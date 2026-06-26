@@ -1,37 +1,35 @@
 require('dotenv').config();
-const express   = require('express');
-const cors      = require('cors');
-const helmet    = require('helmet');
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
 const sequelize = require('./config/database');
 require('./models/index');
 
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
-const taskRoutes = require('./routes/task.routes');  // moved up for clarity
+const taskRoutes = require('./routes/task.routes');
 
 const app = express();
 
-// Security middleware
-app.use(helmet());
 
-// Allow requests from your frontend
+app.use(helmet());
 app.use(cors({
   origin: process.env.CLIENT_URL,
   credentials: true
 }));
 
-// Parse incoming JSON request bodies
+
 app.use(express.json());
 
-// Routes
+// ── ROUTES ───────────────────────────────────
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/uploads', express.static('uploads'));
 
-// ---------- ERROR HANDLERS (must be after all routes) ----------
 
-// 404 handler for routes that do not exist
+
+// ── 404 HANDLER ───────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({
     errorCode: 404,
@@ -40,11 +38,10 @@ app.use((req, res) => {
   });
 });
 
-// Global error handler
+// ── GLOBAL ERROR HANDLER ───────────────────────────────────
 app.use((err, req, res, next) => {
   console.error(err.stack);
 
-  // Handle Multer file errors specifically
   if (err.message === 'File type not allowed.') {
     return res.status(400).json({
       errorCode: 400,
@@ -60,7 +57,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ---------- START SERVER ----------
+// ── START SERVER ───────────────────────────────────
 const PORT = process.env.PORT || 5000;
 
 sequelize.authenticate()

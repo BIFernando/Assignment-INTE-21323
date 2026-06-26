@@ -1,25 +1,21 @@
 const jwt = require('jsonwebtoken');
  
-    // CHECK 1: Is there a valid JWT token?
+// ── VERIFY JWT TOKEN ──────────────────────────────────
     const verifyToken = (req, res, next) => {
- 
-      // Get the token from the Authorization header
-      // The header looks like: "Bearer eyJhbGci..."
+
       const authHeader = req.headers['authorization'];
       const token = authHeader && authHeader.split(' ')[1];
- 
-      // If no token was sent, reject the request
+
       if (!token) {
         return res.status(401).json({
           error: 'Access denied. No token provided.'
         });
       }
- 
-      // Verify the token is valid and not expired
+
       try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded; // attach user info to the request
-        next();             // allow the request to continue
+        req.user = decoded;
+        next();           
       } catch (err) {
         return res.status(401).json({
           error: 'Invalid or expired token.'
@@ -27,10 +23,10 @@ const jwt = require('jsonwebtoken');
       }
     };
  
-    // CHECK 2: Does the user have the required role?
+    // ── AUTHORIZE ROLES ───────────────────────────────────
     const authorizeRoles = (...roles) => {
   return (req, res, next) => {
-    const userRole = req.user.role;           // e.g., "admin"
+    const userRole = req.user.role;           
     const allowed = roles.some(r => r.toLowerCase() === userRole.toLowerCase());
     if (!allowed) {
       return res.status(403).json({

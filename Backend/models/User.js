@@ -42,7 +42,7 @@ const User = sequelize.define('User', {
     allowNull: true
   }
 }, {
-  tableName: 'User',   // ← must match your DB exactly
+  tableName: 'User',  
   timestamps: true
 });
 

@@ -1,19 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
-      requireAuth();
-    requireAdmin(); // redirect non-admins away
-    renderSidebar('users');
+  requireAuth();
+  requireAdmin();
+  renderSidebar('users');
 
-    async function loadUsers() {
-      try {
-        const users = await userAPI.getAll();
-        const tbody = document.getElementById('usersTableBody');
+  async function loadUsers() {
+    try {
+      const users = await userAPI.getAll();
+      const tbody = document.getElementById('usersTableBody');
 
-        if (users.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="5">No users found.</td></tr>';
-          return;
-        }
+      if (users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5">No users found.</td></tr>';
+        return;
+      }
 
-        tbody.innerHTML = users.map(u => `
+      tbody.innerHTML = users.map(u => `
           <tr>
             <td>${u.name}</td>
             <td>${u.email}</td>
@@ -38,44 +38,44 @@ document.addEventListener('DOMContentLoaded', () => {
           </tr>
         `).join('');
 
-      } catch (err) {
-        document.getElementById('errorAlert').textContent = err.message;
-        document.getElementById('errorAlert').classList.add('show');
-      }
+    } catch (err) {
+      document.getElementById('errorAlert').textContent = err.message;
+      document.getElementById('errorAlert').classList.add('show');
     }
-
-    async function deactivateUser(id, name) {
-  const ok = await appConfirm(
-    'Deactivate ' + name + '?',
-    'They will lose access to the system immediately.',
-    'Deactivate'
-  );
-  if (!ok) return;
-  try {
-    await userAPI.deactivate(id);
-    showToast('Success', 'User deactivated successfully.', 'success');
-    loadUsers();
-  } catch (err) {
-    showToast('Error', err.message, 'error');
   }
-}
 
-    // Create user modal
-    document.getElementById('createUserBtn')
-      .addEventListener('click', () => {
+  async function deactivateUser(id, name) {
+    const ok = await appConfirm(
+      'Deactivate ' + name + '?',
+      'They will lose access to the system immediately.',
+      'Deactivate'
+    );
+    if (!ok) return;
+    try {
+      await userAPI.deactivate(id);
+      showToast('Success', 'User deactivated successfully.', 'success');
+      loadUsers();
+    } catch (err) {
+      showToast('Error', err.message, 'error');
+    }
+  }
+
+  // ── CREATE USER MODAL ─────────────────────────────────────────
+  document.getElementById('createUserBtn')
+    .addEventListener('click', () => {
       document.getElementById('createUserModal').classList.add('show');
     });
 
-    document.getElementById('closeUserModal')
-      .addEventListener('click', () => {
+  document.getElementById('closeUserModal')
+    .addEventListener('click', () => {
       document.getElementById('createUserModal').classList.remove('show');
     });
 
-    document.getElementById('saveUserBtn')
-      .addEventListener('click', async () => {
-      const name  = document.getElementById('userName').value.trim();
+  document.getElementById('saveUserBtn')
+    .addEventListener('click', async () => {
+      const name = document.getElementById('userName').value.trim();
       const email = document.getElementById('userEmail').value.trim();
-      const role  = document.getElementById('userRole').value;
+      const role = document.getElementById('userRole').value;
       const errEl = document.getElementById('userModalError');
       errEl.classList.remove('show');
 
@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         await userAPI.create({ name, email, role });
         document.getElementById('createUserModal').classList.remove('show');
-        document.getElementById('userName').value  = '';
+        document.getElementById('userName').value = '';
         document.getElementById('userEmail').value = '';
         showSuccess('User created! Welcome email sent.');
         loadUsers();
@@ -98,19 +98,19 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    function showSuccess(msg) {
-      const el = document.getElementById('successAlert');
-      el.textContent = msg;
-      el.classList.add('show');
-      setTimeout(() => el.classList.remove('show'), 3000);
-    }
+  function showSuccess(msg) {
+    const el = document.getElementById('successAlert');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 3000);
+  }
 
-    function showError(msg) {
-      const el = document.getElementById('errorAlert');
-      el.textContent = msg;
-      el.classList.add('show');
-      setTimeout(() => el.classList.remove('show'), 3000);
-    }
-    window.deactivateUser = deactivateUser;
-    loadUsers();
-  });
+  function showError(msg) {
+    const el = document.getElementById('errorAlert');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 3000);
+  }
+  window.deactivateUser = deactivateUser;
+  loadUsers();
+});

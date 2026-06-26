@@ -14,7 +14,6 @@ const createUser = async (req, res) => {
     if (existingUser)
       return res.status(400).json({ error: 'Email is already in use.' });
 
-    // Generate temporary password
     const tempPassword = Math.random().toString(36).slice(-8) + 'A1!';
     const passwordHash = await bcrypt.hash(tempPassword, 10);
 
@@ -27,7 +26,6 @@ const createUser = async (req, res) => {
       isActive:     true,
     });
 
-    // Send welcome email — wrapped so mail failure doesn't fail user creation
     try {
       await sendWelcomeEmail(email, name, tempPassword);
     } catch (mailErr) {
@@ -119,6 +117,7 @@ const searchUsers = async (req, res) => {
   }
 };
 
+// ── UPDATE PROFILE ─────────────────────────────────────
 const updateProfile = async (req, res) => {
   try {
     const { name } = req.body;

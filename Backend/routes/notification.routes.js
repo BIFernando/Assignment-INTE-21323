@@ -1,5 +1,5 @@
 const express = require('express');
-const router  = express.Router();
+const router = express.Router();
 /**
  * @swagger
  * tags:
@@ -14,7 +14,6 @@ const {
   getUnreadCount,
 } = require('../controllers/notification.controller');
 
-// All notification routes require authentication
 router.use(verifyToken);
 
 
@@ -32,7 +31,7 @@ router.use(verifyToken);
  *       401:
  *         description: Unauthorized
  */
-router.get('/',           getMyNotifications);
+router.get('/', getMyNotifications);
 /**
  * @swagger
  * /api/notifications/unread:
@@ -47,7 +46,7 @@ router.get('/',           getMyNotifications);
  *       401:
  *         description: Unauthorized
  */
-router.get('/unread',     getUnreadCount);
+router.get('/unread', getUnreadCount);
 /**
  * @swagger
  * /api/notifications/read-all:
@@ -62,7 +61,7 @@ router.get('/unread',     getUnreadCount);
  *       401:
  *         description: Unauthorized
  */
-router.put('/read-all',   markAllAsRead);
+router.put('/read-all', markAllAsRead);
 /**
  * @swagger
  * /api/notifications/{id}/read:
@@ -86,6 +85,6 @@ router.put('/read-all',   markAllAsRead);
  *       404:
  *         description: Notification not found
  */
-router.put('/:id/read',   markAsRead);
+router.put('/:id/read', markAsRead);
 
 module.exports = router;

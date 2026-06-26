@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
+  // ── TASK DETAILS ─────────────────────────────────────────
   async function loadTaskDetail() {
     try {
       const task = await taskAPI.getById(taskId);
@@ -24,14 +25,12 @@ document.addEventListener('DOMContentLoaded', () => {
            &nbsp; Due: ${task.dueDate
           ? new Date(task.dueDate).toLocaleDateString() : 'No deadline'}`;
 
-      // Assignees list
       const assignees = task.assignees && task.assignees.length > 0
         ? task.assignees.map(a => a.name).join(', ')
         : 'Unassigned';
       document.getElementById('taskAssignees').innerHTML =
         '<strong>Assigned to:</strong> ' + assignees;
 
-      // Status dropdown — all roles can update status
       document.getElementById('statusSelector').innerHTML = `
           <select class="btn btn-secondary btn-sm" id="statusSelect">
             <option value="TODO"        ${task.status === 'TODO' ? 'selected' : ''}>To Do</option>
@@ -47,11 +46,9 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('Success', 'Status updated to ' +
               newStatus.replace('_', ' ') + '.', 'success');
 
-            // Reload full task details so everything syncs
             await loadTaskDetail();
           } catch (err) {
             showToast('Error', err.message, 'error');
-            // Revert dropdown if update failed
             await loadTaskDetail();
           }
         });
@@ -62,13 +59,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ── Load Comments ─────────────────────────────────
+  // ── LOAD COMMENTS ─────────────────────────────────
   async function loadComments() {
     const list = document.getElementById('commentsList');
     try {
       const comments = await taskAPI.getComments(taskId);
 
-      // Update badge count
       const badge = document.getElementById('commentsBadge');
       if (comments.length > 0) {
         badge.textContent = comments.length;
@@ -131,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ── Time Ago Helper ───────────────────────────────
+  // ── TIME AGO HELPER ────────────────────────────────
   function timeAgo(dateStr) {
     const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
     if (diff < 60) return 'Just now';
@@ -140,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return Math.floor(diff / 86400) + 'd ago';
   }
 
-  // ── Add Comment ───────────────────────────────────
+  // ── ADD COMMENT ───────────────────────────────────
   document.getElementById('addCommentBtn')
     .addEventListener('click', async () => {
       const content =
@@ -156,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-  // ── Delete Comment ────────────────────────────────
+  // ── DELETE COMMENT ────────────────────────────────
   window.deleteComment = async function (id) {
     const ok = await appConfirm(
       'Delete Comment?',
@@ -172,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // ── Comments Panel ────────────────────────────────
+  // ── COMMENTS PANEL ────────────────────────────────
   document.getElementById('commentsBtn')
     .addEventListener('click', () => {
       document.getElementById('commentsPanel').classList.add('open');
@@ -185,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('commentsOverlay').classList.remove('open');
   };
 
-  // ── Load Attachments ──────────────────────────────
+  // ── LOAD ATTACHMENTS ──────────────────────────────
   async function loadAttachments() {
     const list = document.getElementById('attachmentsList');
     try {
@@ -221,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ── Upload Attachment ─────────────────────────────
+  // ── UPLOAD ATTACHMENT ─────────────────────────────
   document.getElementById('uploadBtn')
     .addEventListener('click', async () => {
       const file = document.getElementById('fileInput').files[0];
@@ -239,10 +235,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-  // ── Load project members for assignment modal ──────────────
+  // ── LOAD PROJECT MEMBERS FOR ASSIGNMENT MODAL ──────────────
   async function loadProjectMembersForAssignment() {
     try {
-      // Get the task first to find its projectId
       const task = await taskAPI.getById(taskId);
       const project = await projectAPI.getById(task.projectId);
 
@@ -258,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ── Edit Assignees Modal ───────────────────────────────────
+  // ── EDIT ASSIGNMENTS MODAL ───────────────────────────────────
   const editAssigneesBtn = document.getElementById('editAssigneesBtn');
 
   if (user.role === 'collaborator') {
@@ -306,9 +301,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-  // ── Init ──────────────────────────────────────────
+  // ── INIT ──────────────────────────────────────────
   loadTaskDetail();
   loadAttachments();
-  // Comments load when panel opens, not on page load
 
 });

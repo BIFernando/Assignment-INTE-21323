@@ -1,6 +1,6 @@
 const { Project, ProjectMember, User } = require("../models");
 
-// Create a new project — creator becomes admin
+// ── CREATE A NEW PROJECT ──────────────────────────────────
 const createProject = async (req, res) => {
   try {
     const { name, description } = req.body;
@@ -15,7 +15,6 @@ const createProject = async (req, res) => {
       createdById: req.user.id,
     });
 
-    // Creator becomes admin of the project
     await ProjectMember.create({
       projectId: project.id,
       userId: req.user.id,
@@ -34,7 +33,7 @@ const createProject = async (req, res) => {
   }
 };
 
-// Get all projects the logged-in user belongs to
+// ── GET MY PROJECTS ──────────────────────────────────
 const getMyProjects = async (req, res) => {
   try {
     const memberships = await ProjectMember.findAll({
@@ -64,7 +63,7 @@ const getMyProjects = async (req, res) => {
   }
 };
 
-// Get a single project with its members
+// ── GET A SINGLE PROJECT ──────────────────────────────────
 const getProjectById = async (req, res) => {
   try {
     const project = await Project.findByPk(req.params.id, {
@@ -89,7 +88,6 @@ const getProjectById = async (req, res) => {
       });
     }
 
-    // Check caller is a member of this project
     const membership = await ProjectMember.findOne({
       where: {
         projectId: req.params.id,
@@ -115,13 +113,12 @@ const getProjectById = async (req, res) => {
   }
 };
 
-// Invite a user to a project by email
+// ── INVITE A USER TO A PROJECT ──────────────────────────────────
 const inviteMember = async (req, res) => {
   try {
     const { email, role } = req.body;
     const projectId = req.params.id;
 
-    // Check caller is project admin
     const caller = await ProjectMember.findOne({
       where: {
         projectId,
@@ -135,7 +132,6 @@ const inviteMember = async (req, res) => {
       });
     }
 
-    // Find active user by email
     const user = await User.findOne({
       where: {
         email,
@@ -149,7 +145,6 @@ const inviteMember = async (req, res) => {
       });
     }
 
-    // Check not already a member
     const existing = await ProjectMember.findOne({
       where: {
         projectId,
@@ -180,13 +175,11 @@ const inviteMember = async (req, res) => {
   }
 };
 
-// Update a member's role within a project
+// ── UPDATE A MEMBER'S ROLE ──────────────────────────────────
 const updateMemberRole = async (req, res) => {
   try {
     const { id: projectId, userId } = req.params;
     const { role } = req.body;
-
-    // Check caller is project admin
     const caller = await ProjectMember.findOne({
       where: {
         projectId,
@@ -200,7 +193,6 @@ const updateMemberRole = async (req, res) => {
       });
     }
 
-    // Cannot change your own role
     if (parseInt(userId) === req.user.id) {
       return res.status(400).json({
         message: "You cannot change your own role.",
@@ -233,12 +225,11 @@ const updateMemberRole = async (req, res) => {
   }
 };
 
-// Remove a member from a project
+// ── REMOVE A MEMBER FROM A PROJECT ──────────────────────────────────
 const removeMember = async (req, res) => {
   try {
     const { id: projectId, userId } = req.params;
 
-    // Check caller is project admin
     const caller = await ProjectMember.findOne({
       where: {
         projectId,
@@ -252,7 +243,6 @@ const removeMember = async (req, res) => {
       });
     }
 
-    // Cannot remove yourself
     if (parseInt(userId) === req.user.id) {
       return res.status(400).json({
         message: "You cannot remove yourself from the project.",
@@ -277,18 +267,17 @@ const removeMember = async (req, res) => {
   }
 };
 
+// ── DELETE PROJECT ──────────────────────────────────
  const deleteProject = async (req, res) => {
     try {
       const { id } = req.params;
       const userId = req.user.id;
- 
-      // Find the project
+
       const project = await Project.findByPk(id);
       if (!project) {
         return res.status(404).json({ error: 'Project not found.' });
       }
- 
-      // Only project admin can delete
+      
       const member = await ProjectMember.findOne({
         where: { projectId: id, userId }
       });
