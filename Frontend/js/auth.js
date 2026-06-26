@@ -221,15 +221,21 @@ async function loadNotifications() {
     `).join('');
 
     notifications.filter(n => !n.isRead).forEach(n => {
-      notificationAPI.markRead(n.id).catch(() => { });
+      notificationAPI.markAsRead(n.id).catch(() => { });
     });
 
     const badge = document.getElementById('notifBadge');
     if (badge) badge.style.display = 'none';
 
-  } catch (err) {
-    list.innerHTML = `<div class="notif-empty">Could not load notifications.</div>`;
-  }
+  }catch (err) {
+    console.error(err);
+
+    list.innerHTML = `
+        <div class="notif-empty">
+            ${err.message}
+        </div>
+    `;
+}
 }
 
 async function markAllRead() {

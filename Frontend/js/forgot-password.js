@@ -25,6 +25,16 @@ document.addEventListener('DOMContentLoaded', () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email })
         });
+  document.getElementById('email').value = '';
+
+} catch (err) {
+
+  console.error(err);
+
+  errEl.textContent =
+    err.message || 'Something went wrong. Please try again.';
+
+  errEl.classList.add('show');
 
         sucEl.textContent =
           'If that email exists, a reset link has been sent. Check your inbox.';

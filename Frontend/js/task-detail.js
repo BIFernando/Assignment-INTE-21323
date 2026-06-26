@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const params = new URLSearchParams(window.location.search);
   const taskId = params.get('id');
+
   if (!taskId) {
     window.location.href = 'projects.html';
     return;
@@ -20,38 +21,66 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('taskTitle').textContent = task.title;
       document.getElementById('taskDescription').textContent =
         task.description || 'No description.';
+
       document.getElementById('taskMeta').innerHTML =
         `<span class="badge badge-${task.priority.toLowerCase()}">${task.priority}</span>
-           &nbsp; Due: ${task.dueDate
-          ? new Date(task.dueDate).toLocaleDateString() : 'No deadline'}`;
+         &nbsp; Due: ${task.dueDate
+          ? new Date(task.dueDate).toLocaleDateString()
+          : 'No deadline'}`;
 
       const assignees = task.assignees && task.assignees.length > 0
         ? task.assignees.map(a => a.name).join(', ')
         : 'Unassigned';
+
       document.getElementById('taskAssignees').innerHTML =
         '<strong>Assigned to:</strong> ' + assignees;
 
-      document.getElementById('statusSelector').innerHTML = `
-          <select class="btn btn-secondary btn-sm" id="statusSelect">
-            <option value="TODO"        ${task.status === 'TODO' ? 'selected' : ''}>To Do</option>
-            <option value="IN_PROGRESS" ${task.status === 'IN_PROGRESS' ? 'selected' : ''}>In Progress</option>
-            <option value="COMPLETED"   ${task.status === 'COMPLETED' ? 'selected' : ''}>Completed</option>
-          </select>
-        `;
-      document.getElementById('statusSelect')
-        .addEventListener('change', async (e) => {
-          const newStatus = e.target.value;
-          try {
-            await taskAPI.update(taskId, { status: newStatus });
-            showToast('Success', 'Status updated to ' +
-              newStatus.replace('_', ' ') + '.', 'success');
+      // ── STATUS DROPDOWN ─────────────────────────────
+      const statusSelector = document.getElementById('statusSelector');
 
-            await loadTaskDetail();
-          } catch (err) {
-            showToast('Error', err.message, 'error');
-            await loadTaskDetail();
-          }
-        });
+      const dropdownHTML = `
+        <select class="btn btn-secondary btn-sm" id="statusSelect">
+          <option value="TODO" ${task.status === 'TODO' ? 'selected' : ''}>To Do</option>
+          <option value="IN_PROGRESS" ${task.status === 'IN_PROGRESS' ? 'selected' : ''}>In Progress</option>
+          <option value="COMPLETED" ${task.status === 'COMPLETED' ? 'selected' : ''}>Completed</option>
+        </select>
+      `;
+
+      if (!statusSelector.querySelector('#statusSelect')) {
+        statusSelector.innerHTML = dropdownHTML;
+
+        document.getElementById('statusSelect')
+          .addEventListener('change', async (e) => {
+            const newStatus = e.target.value;
+            const dropdown = document.getElementById('statusSelect');
+            const originalValue = dropdown.value;
+
+            try {
+              dropdown.disabled = true;
+
+              await taskAPI.update(taskId, { status: newStatus });
+
+              await new Promise(resolve => setTimeout(resolve, 200));
+
+              showToast(
+                'Success',
+                'Status updated to ' + newStatus.replace('_', ' ') + '.',
+                'success'
+              );
+
+              await loadTaskDetail();
+
+            } catch (err) {
+              dropdown.value = originalValue;
+              showToast('Error', err.message, 'error');
+            } finally {
+              dropdown.disabled = false;
+            }
+          });
+
+      } else {
+        document.getElementById('statusSelect').value = task.status;
+      }
 
     } catch (err) {
       document.getElementById('pageError').textContent = err.message;
@@ -59,75 +88,57 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ── LOAD COMMENTS ─────────────────────────────────
+  // ── COMMENTS PANEL ───────────────────────────────
+  document.getElementById('commentsBtn')
+    .addEventListener('click', async () => {
+      document.getElementById('commentsPanel').classList.add('open');
+      document.getElementById('commentsOverlay').classList.add('open');
+
+      await loadComments();
+
+      if (!window.commentRefreshInterval) {
+        window.commentRefreshInterval = setInterval(() => {
+          if (document.getElementById('commentsPanel').classList.contains('open')) {
+            loadComments();
+          } else {
+            clearInterval(window.commentRefreshInterval);
+            window.commentRefreshInterval = null;
+          }
+        }, 5000);
+      }
+    });
+
+  window.closeComments = function () {
+    document.getElementById('commentsPanel').classList.remove('open');
+    document.getElementById('commentsOverlay').classList.remove('open');
+  };
+
+  // ── LOAD COMMENTS ────────────────────────────────
   async function loadComments() {
     const list = document.getElementById('commentsList');
+
     try {
       const comments = await taskAPI.getComments(taskId);
 
-      const badge = document.getElementById('commentsBadge');
-      if (comments.length > 0) {
-        badge.textContent = comments.length;
-        badge.style.display = 'inline-flex';
-      } else {
-        badge.style.display = 'none';
-      }
-
       if (comments.length === 0) {
-        list.innerHTML = `
-          <div class="notif-empty">
-            <i class="bi bi-chat-left"
-               style="font-size:28px; opacity:0.3;"></i>
-            <div style="margin-top:8px;">No comments yet.</div>
-            <div style="font-size:12px; margin-top:4px;">
-              Be the first to comment.
-            </div>
-          </div>`;
+        list.innerHTML = `<div class="notif-empty">No comments yet.</div>`;
         return;
       }
 
       list.innerHTML = comments.map(c => `
-        <div class="notif-item" style="align-items:flex-start;">
-          <div class="sidebar-avatar"
-               style="width:32px; height:32px; font-size:12px; flex-shrink:0;">
-            ${c.author
-          ? c.author.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-          : '?'}
-          </div>
-          <div style="flex:1; min-width:0;">
-            <div style="display:flex; justify-content:space-between;
-                        align-items:center; margin-bottom:4px;">
-              <span style="font-size:13px; font-weight:600;
-                           color:var(--text);">
-                ${c.author ? c.author.name : 'Unknown'}
-              </span>
-              <span style="font-size:11px; color:var(--text-muted);">
-                ${timeAgo(c.createdAt)}
-              </span>
-            </div>
-            <div style="font-size:13px; color:var(--text-secondary);
-                        line-height:1.5; word-break:break-word;">
-              ${c.content}
-            </div>
-            ${c.userId === user.id ? `
-              <button onclick="deleteComment('${c.id}')"
-                style="background:none; border:none; color:var(--danger);
-                       font-size:11px; cursor:pointer; padding:4px 0;
-                       margin-top:4px;">
-                Delete
-              </button>
-            ` : ''}
-          </div>
+        <div class="notif-item">
+          <div><strong>${c.author?.name || 'Unknown'}</strong></div>
+          <div>${c.content}</div>
+          <small>${timeAgo(c.createdAt)}</small>
         </div>
       `).join('');
 
     } catch (err) {
-      list.innerHTML =
-        `<div class="notif-empty">Could not load comments.</div>`;
+      list.innerHTML = `<div class="notif-empty">Could not load comments.</div>`;
     }
   }
 
-  // ── TIME AGO HELPER ────────────────────────────────
+  // ── TIME HELPERS ────────────────────────────────
   function timeAgo(dateStr) {
     const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
     if (diff < 60) return 'Just now';
@@ -136,173 +147,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return Math.floor(diff / 86400) + 'd ago';
   }
 
-  // ── ADD COMMENT ───────────────────────────────────
-  document.getElementById('addCommentBtn')
-    .addEventListener('click', async () => {
-      const content =
-        document.getElementById('commentInput').value.trim();
-      if (!content) return;
-
-      try {
-        await taskAPI.addComment(taskId, content);
-        document.getElementById('commentInput').value = '';
-        loadComments();
-      } catch (err) {
-        showToast('Error', err.message, 'error');
-      }
-    });
-
-  // ── DELETE COMMENT ────────────────────────────────
-  window.deleteComment = async function (id) {
-    const ok = await appConfirm(
-      'Delete Comment?',
-      'This cannot be undone.',
-      'Delete'
-    );
-    if (!ok) return;
-    try {
-      await taskAPI.deleteComment(taskId, id);
-      loadComments();
-    } catch (err) {
-      showToast('Error', err.message, 'error');
-    }
-  };
-
-  // ── COMMENTS PANEL ────────────────────────────────
-  document.getElementById('commentsBtn')
-    .addEventListener('click', () => {
-      document.getElementById('commentsPanel').classList.add('open');
-      document.getElementById('commentsOverlay').classList.add('open');
-      loadComments();
-    });
-
-  window.closeComments = function () {
-    document.getElementById('commentsPanel').classList.remove('open');
-    document.getElementById('commentsOverlay').classList.remove('open');
-  };
-
-  // ── LOAD ATTACHMENTS ──────────────────────────────
-  async function loadAttachments() {
-    const list = document.getElementById('attachmentsList');
-    try {
-      const files = await taskAPI.getAttachments(taskId);
-
-      if (files.length === 0) {
-        list.innerHTML =
-          `<p style="color:var(--text-muted); font-size:14px;">
-             No attachments yet.
-           </p>`;
-        return;
-      }
-
-      list.innerHTML = files.map(f => `
-        <div style="display:flex; align-items:center; gap:10px;
-                    padding:8px 0; border-bottom:1px solid var(--border-light);">
-          <i class="bi bi-file-earmark"
-             style="color:var(--primary); font-size:18px;"></i>
-          <span style="font-size:14px; flex:1;">${f.fileName}</span>
-          <a href="/${f.fileUrl.replace(/^\/+/, '')}"
-            target="_blank"
-            class="btn btn-secondary btn-sm">
-            <i class="bi bi-eye"></i> View
-          </a>
-        </div>
-      `).join('');
-
-    } catch (err) {
-      list.innerHTML =
-        `<p style="color:var(--danger); font-size:14px;">
-           Could not load attachments.
-         </p>`;
-    }
-  }
-
-  // ── UPLOAD ATTACHMENT ─────────────────────────────
-  document.getElementById('uploadBtn')
-    .addEventListener('click', async () => {
-      const file = document.getElementById('fileInput').files[0];
-      if (!file) {
-        showToast('Error', 'Please choose a file first.', 'error');
-        return;
-      }
-      try {
-        await taskAPI.uploadAttachment(taskId, file);
-        document.getElementById('fileInput').value = '';
-        showToast('Success', 'File uploaded.', 'success');
-        loadAttachments();
-      } catch (err) {
-        showToast('Error', err.message, 'error');
-      }
-    });
-
-  // ── LOAD PROJECT MEMBERS FOR ASSIGNMENT MODAL ──────────────
-  async function loadProjectMembersForAssignment() {
-    try {
-      const task = await taskAPI.getById(taskId);
-      const project = await projectAPI.getById(task.projectId);
-
-      const select = document.getElementById('assigneesSelect');
-      select.innerHTML = project.members.map(m => `
-        <option value="${m.userId}"
-          ${task.assignees && task.assignees.some(a => a.id === m.userId) ? 'selected' : ''}>
-          ${m.user ? m.user.name : 'Unknown'}
-        </option>
-      `).join('');
-    } catch (err) {
-      console.error('Could not load members:', err);
-    }
-  }
-
-  // ── EDIT ASSIGNMENTS MODAL ───────────────────────────────────
-  const editAssigneesBtn = document.getElementById('editAssigneesBtn');
-
-  if (user.role === 'collaborator') {
-    editAssigneesBtn.style.display = 'none';
-  } else {
-    editAssigneesBtn.addEventListener('click', async () => {
-      await loadProjectMembersForAssignment();
-      document.getElementById('assigneesModal').classList.add('show');
-    });
-  }
-
-  document.getElementById('closeAssigneesModal')
-    .addEventListener('click', () => {
-      document.getElementById('assigneesModal').classList.remove('show');
-    });
-
-  document.getElementById('closeAssigneesModal2')
-    .addEventListener('click', () => {
-      document.getElementById('assigneesModal').classList.remove('show');
-    });
-
-  document.getElementById('saveAssigneesBtn')
-    .addEventListener('click', async () => {
-      const select = document.getElementById('assigneesSelect');
-      const assigneeIds = Array.from(select.selectedOptions)
-        .map(opt => opt.value);
-
-      if (assigneeIds.length === 0) {
-        document.getElementById('assigneesError').textContent =
-          'Select at least one assignee.';
-        document.getElementById('assigneesError').classList.add('show');
-        return;
-      }
-
-      try {
-        await taskAPI.assignUsers(taskId, assigneeIds);
-        showToast('Success', 'Assignees updated.', 'success');
-        document.getElementById('assigneesModal').classList.remove('show');
-        await loadTaskDetail();
-      } catch (err) {
-        document.getElementById('assigneesError').textContent = err.message;
-        document.getElementById('assigneesError').classList.add('show');
-      }
-    });
-
-
-
-  // ── INIT ──────────────────────────────────────────
+  // ── INIT ─────────────────────────────────────────
   loadTaskDetail();
-  loadAttachments();
-
 });
