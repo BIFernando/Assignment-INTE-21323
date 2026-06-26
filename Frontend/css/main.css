@@ -914,10 +914,13 @@ img {
 
 /* ── Kanban Board ────────────────────────────────────────── */
 .kanban-board {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
   gap: 20px;
-  align-items: start;
+  overflow-x: auto;
+  overflow-y: hidden;
+  align-items: flex-start;
+  padding-bottom: 12px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .kanban-column {
@@ -925,7 +928,10 @@ img {
   border-radius: var(--radius-lg);
   padding: 16px;
   min-height: 500px;
+  min-width: 320px;
+  flex-shrink: 0;
 }
+
 
 .kanban-header {
   display: flex;
@@ -1347,7 +1353,16 @@ img {
   }
 
   .kanban-board {
+    overflow-x: auto;
+    display: flex;
+    gap: 12px;
+    padding-bottom: 12px;
     grid-template-columns: 1fr;
+  }
+
+  .kanban-column {
+    min-width: 280px;
+    flex-shrink: 0;
   }
 
   .stat-grid {
