@@ -7,10 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('nameInput').value = user.name || '';
   document.getElementById('emailInput').value = user.email || '';
-  document.getElementById('joinedInput').value =
-    user.createdAt
-      ? new Date(user.createdAt).toLocaleDateString()
-      : 'N/A';
+
 
   const initials = user.name
     ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
