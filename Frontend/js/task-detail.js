@@ -147,14 +147,31 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('commentInput').value.trim();
       if (!content) return;
 
+      // Disable button while submitting
+      const btn = document.getElementById('addCommentBtn');
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Sending...';
+
       try {
         await taskAPI.addComment(taskId, content);
         document.getElementById('commentInput').value = '';
-        loadComments();
+        
+        // Add a small delay to ensure backend has saved
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // Reload comments
+        await loadComments();
+        
+        showToast('Success', 'Comment posted.', 'success');
       } catch (err) {
         showToast('Error', err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
       }
     });
+
 
   // ── Delete Comment ────────────────────────────────
   window.deleteComment = async function (id) {
@@ -173,12 +190,27 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // ── Comments Panel ────────────────────────────────
-  document.getElementById('commentsBtn')
-    .addEventListener('click', () => {
+ document.getElementById('commentsBtn')
+    .addEventListener('click', async () => {
       document.getElementById('commentsPanel').classList.add('open');
       document.getElementById('commentsOverlay').classList.add('open');
-      loadComments();
+      
+      // Refresh comments every time panel opens
+      await loadComments();
+      
+      // Optional: auto-refresh comments every 5 seconds while panel is open
+      if (!window.commentRefreshInterval) {
+        window.commentRefreshInterval = setInterval(() => {
+          if (document.getElementById('commentsPanel').classList.contains('open')) {
+            loadComments();
+          } else {
+            clearInterval(window.commentRefreshInterval);
+            window.commentRefreshInterval = null;
+          }
+        }, 5000);
+      }
     });
+
 
   window.closeComments = function () {
     document.getElementById('commentsPanel').classList.remove('open');
