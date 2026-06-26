@@ -251,11 +251,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadTasks();
 
-  window.addEventListener('pageshow', (event) => {
-    if (event.persisted || sessionStorage.getItem('tasksNeedReload')) {
-      sessionStorage.removeItem('tasksNeedReload');
-      loadTasks();
+  let initialPageshow = true;
+  window.addEventListener('pageshow', () => {
+    if (initialPageshow) {
+      initialPageshow = false;
+      return;
     }
+    loadTasks();
   });
 
 }); 
