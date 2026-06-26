@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const user = getCurrentUser();
 
-  // Populate fields from localStorage immediately
   document.getElementById('nameInput').value = user.name || '';
   document.getElementById('emailInput').value = user.email || '';
   document.getElementById('joinedInput').value =
@@ -13,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
       ? new Date(user.createdAt).toLocaleDateString()
       : 'N/A';
 
-  // Avatar initials
   const initials = user.name
     ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : '?';
@@ -22,7 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('profileRole').textContent =
     user.role ? user.role.replace('_', ' ') : 'No global role';
 
-  // Save name change
   document.getElementById('saveProfileBtn')
     .addEventListener('click', async () => {
       const name = document.getElementById('nameInput').value.trim();
@@ -41,11 +38,9 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         await userAPI.updateProfile({ name });
 
-        // Update localStorage so sidebar reflects new name
         const updatedUser = { ...user, name };
         localStorage.setItem('user', JSON.stringify(updatedUser));
 
-        // Update displayed name
         document.getElementById('profileName').textContent = name;
         document.getElementById('profileAvatar').textContent =
           name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -72,7 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
       errEl.classList.remove('show');
       sucEl.classList.remove('show');
 
-      // Validation
       if (!currentPassword) {
         errEl.textContent = 'Current password is required.';
         errEl.classList.add('show');
@@ -121,12 +115,10 @@ document.addEventListener('DOMContentLoaded', () => {
         sucEl.textContent = 'Password changed successfully. Please log in again.';
         sucEl.classList.add('show');
 
-        // Clear inputs
         document.getElementById('currentPasswordInput').value = '';
         document.getElementById('newPasswordInput').value = '';
         document.getElementById('confirmPasswordInput').value = '';
 
-        // Redirect to login after 2 seconds
         setTimeout(() => {
           logout();
         }, 2000);

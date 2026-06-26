@@ -1,12 +1,11 @@
-// The base URL of your backend server
 const API_BASE = '/api';
 
-// Helper: get the stored JWT token
+// ── TOKEN MANAGEMENT ───────────────────────────────────────
 function getToken() {
   return localStorage.getItem('token');
 }
 
-// Helper: build headers with Authorization token
+// ── AUTH HEADERS ─────────────────────────────────────────
 function authHeaders() {
   return {
     'Content-Type': 'application/json',
@@ -14,7 +13,7 @@ function authHeaders() {
   };
 }
 
-// Helper: handle API errors consistently
+// ── RESPONSE HANDLING ──────────────────────────────────────
 async function handleResponse(res) {
   const data = await res.json();
   if (!res.ok) {
@@ -211,6 +210,7 @@ const notificationAPI = {
     }).then(handleResponse),
 };
 
+// ── PROJECT ─────────────────────────────────────────
 const projectAPI = {
   getAll: () =>
     fetch(API_BASE + "/projects", {

@@ -1,10 +1,9 @@
 const { Notification } = require('../models/index');
 const { sendNotification } = require('./socket.service');
 
-// CREATE AND SEND A NOTIFICATION
+// ── CREATE NOTIFICATION ───────────────────────────────────
 async function createNotification(io, userId, message, type) {
   try {
-    // Save notification to database
     const notification = await Notification.create({
       userId: userId,
       message: message,
@@ -12,7 +11,6 @@ async function createNotification(io, userId, message, type) {
       isRead: false,
     });
 
-    // Send real-time notification
     sendNotification(io, userId, {
       id: notification.id,
       message: notification.message,

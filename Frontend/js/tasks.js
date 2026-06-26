@@ -1,15 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-  requireAuth(); 
+  requireAuth();
   renderSidebar('tasks');
 
   const user = getCurrentUser();
 
-  // Get projectId from URL
+  // ── GET PROJECT ID FROM URL ─────────────────────────────────────────
   const urlParams = new URLSearchParams(window.location.search);
   const projectId = urlParams.get('projectId');
 
-  // If no projectId, redirect to projects page
   if (!projectId) {
     window.location.href = 'projects.html';
     return;
@@ -18,22 +17,21 @@ document.addEventListener('DOMContentLoaded', () => {
   let allTasks = [];
   let isKanban = false;
 
-  // Hide create button for collaborators (lowercase to match DB)
   if (user.role === 'collaborator') {
     document.getElementById('createTaskBtn').style.display = 'none';
   }
-// Load project members for assignment dropdown
+  // ── LOAD PROJECT MEMBERS ─────────────────────────────────────────
   async function loadProjectMembers() {
     try {
       const project = await projectAPI.getById(projectId);
-      const select  = document.getElementById('taskAssignees');
- 
+      const select = document.getElementById('taskAssignees');
+
       if (!project.members || project.members.length === 0) {
         select.innerHTML =
           '<option disabled>No members found</option>';
         return;
       }
- 
+
       select.innerHTML = project.members.map(m => `
         <option value="${m.userId}">
           ${m.user ? m.user.name : 'Unknown'}
@@ -44,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('Could not load members:', err);
     }
   }
-  // ── Load Tasks ─────────────────────────────────
+  // ── LOAD TASKS ─────────────────────────────────
   async function loadTasks() {
     try {
       allTasks = await taskAPI.getAll({ projectId });
@@ -55,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ── Render List View ───────────────────────────
+  // ── RENDER LIST VIEW ───────────────────────────
   function renderList() {
     const tbody = document.getElementById('taskTableBody');
     if (allTasks.length === 0) {
@@ -92,8 +90,8 @@ document.addEventListener('DOMContentLoaded', () => {
         </td>
         <td>${task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '—'}</td>
         <td>${task.assignees && task.assignees.length > 0
-              ? task.assignees.map(a => a.name).join(', ')
-              : 'Unassigned'}</td>
+        ? task.assignees.map(a => a.name).join(', ')
+        : 'Unassigned'}</td>
         <td>
           ${user.role !== 'collaborator' ? `
             <button class="btn btn-danger btn-sm"
@@ -104,14 +102,14 @@ document.addEventListener('DOMContentLoaded', () => {
     `).join('');
   }
 
-  // ── Render Kanban View ─────────────────────────
+  // ── RENDER KANBAN VIEW ─────────────────────────
   function renderKanban() {
     const statuses = ['TODO', 'IN_PROGRESS', 'COMPLETED'];
 
     statuses.forEach(status => {
-      const cards     = allTasks.filter(t => t.status === status);
+      const cards = allTasks.filter(t => t.status === status);
       const container = document.getElementById('cards-' + status);
-      const counter   = document.getElementById('count-' + status);
+      const counter = document.getElementById('count-' + status);
 
       counter.textContent = cards.length;
 
@@ -150,90 +148,93 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 `).join('');
 
-    // Drag and drop
-    statuses.forEach(status => {
-      new Sortable(document.getElementById('cards-' + status), {
-        group: 'tasks',
-        animation: 150,
-        ghostClass: 'dragging',
-        onEnd: async (evt) => { const taskId = evt.item.dataset.id; 
-          const newStatus = evt.to.id.replace('cards-', ''); 
-          try { await taskAPI.update(taskId, { status: newStatus }); 
-          loadTasks(); } catch (err) { showToast('Error', 'Could not update task status.', 'error'); 
-            loadTasks(); 
-          } 
-        }
+      // ── DRAG AND DROP ─────────────────────────────────────────
+      statuses.forEach(status => {
+        new Sortable(document.getElementById('cards-' + status), {
+          group: 'tasks',
+          animation: 150,
+          ghostClass: 'dragging',
+          onEnd: async (evt) => {
+            const taskId = evt.item.dataset.id;
+            const newStatus = evt.to.id.replace('cards-', '');
+            try {
+              await taskAPI.update(taskId, { status: newStatus });
+              loadTasks();
+            } catch (err) {
+              showToast('Error', 'Could not update task status.', 'error');
+              loadTasks();
+            }
+          }
+        });
       });
     });
-  });
-}
+  }
 
-  // ── Toggle View ────────────────────────────────
+  // ── TOGGLE VIEW ────────────────────────────────
   const toggleBtn = document.getElementById('toggleView');
   if (toggleBtn) {
     toggleBtn.addEventListener('click', () => {
       isKanban = !isKanban;
-      document.getElementById('listView').style.display   = isKanban ? 'none'  : 'block';
+      document.getElementById('listView').style.display = isKanban ? 'none' : 'block';
       document.getElementById('kanbanView').style.display = isKanban ? 'block' : 'none';
       toggleBtn.textContent = isKanban ? 'Switch to List' : 'Switch to Kanban';
       if (isKanban) renderKanban();
     });
   }
 
-  // ── Create Task Modal ──────────────────────────
+  // ── CREATE TASK MODAL ──────────────────────────
   document.getElementById('createTaskBtn').addEventListener('click', () => {
-  loadProjectMembers();
-  document.getElementById('createModal').classList.add('show');
-});
+    loadProjectMembers();
+    document.getElementById('createModal').classList.add('show');
+  });
 
   document.getElementById('closeModal').addEventListener('click', () => {
     document.getElementById('createModal').classList.remove('show');
   });
 
-document.getElementById('saveTaskBtn').addEventListener('click', async () => {
-  const title    = document.getElementById('taskTitle').value.trim();
-  const desc     = document.getElementById('taskDesc').value.trim();
-  const priority = document.getElementById('taskPriority').value;
-  const dueDate  = document.getElementById('taskDueDate').value;
+  document.getElementById('saveTaskBtn').addEventListener('click', async () => {
+    const title = document.getElementById('taskTitle').value.trim();
+    const desc = document.getElementById('taskDesc').value.trim();
+    const priority = document.getElementById('taskPriority').value;
+    const dueDate = document.getElementById('taskDueDate').value;
 
-  // Get selected assignee IDs from multi-select
-  const assigneeSelect = document.getElementById('taskAssignees');
-  const assigneeIds = Array.from(assigneeSelect.selectedOptions)
-    .map(opt => opt.value);
+    const assigneeSelect = document.getElementById('taskAssignees');
+    const assigneeIds = Array.from(assigneeSelect.selectedOptions)
+      .map(opt => opt.value);
 
-  document.getElementById('titleError').classList.remove('show');
-  document.getElementById('modalError').classList.remove('show');
+    document.getElementById('titleError').classList.remove('show');
+    document.getElementById('modalError').classList.remove('show');
 
-  if (!title) {
-    document.getElementById('titleError').classList.add('show');
-    return;
-  }
+    if (!title) {
+      document.getElementById('titleError').classList.add('show');
+      return;
+    }
 
-  try {
-    const task = await taskAPI.create({
-      title,
-      description: desc,
-      priority,
-      dueDate: dueDate || null,
-      projectId,
-      assigneeIds
-    });
+    try {
+      const task = await taskAPI.create({
+        title,
+        description: desc,
+        priority,
+        dueDate: dueDate || null,
+        projectId,
+        assigneeIds
+      });
 
-    document.getElementById('createModal').classList.remove('show');
-    document.getElementById('taskTitle').value = '';
-    document.getElementById('taskDesc').value = '';
-    assigneeSelect.selectedIndex = -1;
+      document.getElementById('createModal').classList.remove('show');
+      document.getElementById('taskTitle').value = '';
+      document.getElementById('taskDesc').value = '';
+      assigneeSelect.selectedIndex = -1;
 
-    loadTasks();
-  } catch (err) {
-    const errEl = document.getElementById('modalError');
-    errEl.textContent = err.message;
-    errEl.classList.add('show');
-  }
-});
+      loadTasks();
+    } catch (err) {
+      const errEl = document.getElementById('modalError');
+      errEl.textContent = err.message;
+      errEl.classList.add('show');
+    }
+  });
 
-  // ── Delete Task ────────────────────────────────
-  window.deleteTask = async function(id) {
+  // ── DELETE TASK ─────────────────────────────────
+  window.deleteTask = async function (id) {
     const ok = await appConfirm(
       'Delete Task?',
       'This action cannot be undone.',
@@ -251,4 +252,3 @@ document.getElementById('saveTaskBtn').addEventListener('click', async () => {
   loadTasks();
 
 }); 
-// end DOMContentLoaded

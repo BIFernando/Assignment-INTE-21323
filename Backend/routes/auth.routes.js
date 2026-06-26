@@ -5,14 +5,14 @@ const { body, validationResult } = require('express-validator');
 const { login, resetPassword, register, forgotPassword, resetPasswordWithToken, changePassword } = require("../controllers/auth.controller");
 const { verifyToken } = require('../middleware/auth.middleware');
 
-// Limit login to 10 attempts per 15 minutes
+// ── LOGIN RATE LIMITING ──────────────────────────────────
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
   message: { error: 'Too many login attempts. Please try again later.' }
 });
 
-//validation rules for registration
+// ── REGISTER VALIDATION ──────────────────────────────────
 const registerValidation = [
   body("name")
     .trim()
@@ -29,7 +29,7 @@ const registerValidation = [
     .matches(/[0-9]/).withMessage("Password needs a number."),
 ];
 
-// Validation rules for login
+// ── LOGIN VALIDATION ───────────────────────────────────
 const loginValidation = [
   body('email')
     .trim()
@@ -43,7 +43,7 @@ const loginValidation = [
     .withMessage('Password must be at least 6 characters.'),
 ];
 
-// Validation rules for reset password
+// ── RESET PASSWORD VALIDATION ──────────────────────────
 const resetPasswordValidation = [
   body('newPassword')
     .isLength({ min: 8 })
@@ -54,7 +54,7 @@ const resetPasswordValidation = [
     .withMessage('Password must contain at least one number.'),
 ];
 
-// Validation middleware
+// ── VALIDATION MIDDLEWARE ──────────────────────────────
 const validate = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -169,6 +169,8 @@ router.post('/reset-password', verifyToken, resetPasswordValidation, validate, r
 
 // POST /api/auth/register
 router.post("/register", registerValidation, validate, register);
+
+// POST /api/auth/change-password
 router.post('/change-password', verifyToken, changePassword);
 
 // Forgot password

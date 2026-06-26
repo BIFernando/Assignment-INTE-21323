@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   requireAuth();
   renderSidebar("projects");
 
+  // ── LOAD PROJECTS ─────────────────────────────────────────
   async function loadProjects() {
     try {
       const projects = await projectAPI.getAll();
@@ -27,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       </div>
       <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-        <span class="badge badge-${p.myRole}">${p.myRole.replace("_"," ")}</span>
+        <span class="badge badge-${p.myRole}">${p.myRole.replace("_", " ")}</span>
         ${p.myRole === 'admin' ? `
           <button class="btn btn-danger btn-sm"
             onclick="event.stopPropagation(); deleteProject('${p.id}')">
@@ -75,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-   window.deleteProject = async function(id) {
+  window.deleteProject = async function (id) {
     const ok = await appConfirm(
       'Delete Project?',
       'This will permanently delete the project and all its tasks. This cannot be undone.',
@@ -90,7 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
       showToast('Error', err.message, 'error');
     }
   };
- 
+
 
   loadProjects();
 });

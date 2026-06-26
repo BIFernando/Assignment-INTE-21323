@@ -1,38 +1,38 @@
 require('dotenv').config();
 
-const express    = require('express');
-const cors       = require('cors');
-const helmet     = require('helmet');
-const morgan     = require('morgan');
-const hpp        = require('hpp');
-const http       = require('http');
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const hpp = require('hpp');
+const http = require('http');
 const { Server } = require('socket.io');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
 
-const sequelize  = require('./config/database');
+const sequelize = require('./config/database');
 require('./models/index');
 
-const authRoutes         = require('./routes/auth.routes');
-const userRoutes         = require('./routes/user.routes');
-const taskRoutes         = require('./routes/task.routes');
+const authRoutes = require('./routes/auth.routes');
+const userRoutes = require('./routes/user.routes');
+const taskRoutes = require('./routes/task.routes');
 const notificationRoutes = require('./routes/notification.routes');
-const projectRoutes      = require('./routes/Project.routes'); // ← ADD THIS
+const projectRoutes = require('./routes/Project.routes'); // ← ADD THIS
 
-const app    = express();
+const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-   origin: [
-  'http://localhost:3000',
-  'http://127.0.0.1:5500',
-  'http://localhost:5500',
-  'http://taskflowtms.sytes.net',
-  'http://taskflowtms.sytes.net:3000',
-  'https://taskflowtms.sytes.net',
-  process.env.CLIENT_URL
-].filter(Boolean),
+    origin: [
+      'http://localhost:3000',
+      'http://127.0.0.1:5500',
+      'http://localhost:5500',
+      'http://taskflowtms.sytes.net',
+      'http://taskflowtms.sytes.net:3000',
+      'https://taskflowtms.sytes.net',
+      process.env.CLIENT_URL
+    ].filter(Boolean),
     methods: ['GET', 'POST'],
     credentials: true,
   }
@@ -43,7 +43,7 @@ app.set('io', io);
 const { initializeSocket } = require('./services/socket.service');
 initializeSocket(io);
 
-// ── Security Middleware ─────────────────────────────────
+// ── SECURITY MIDDLEWARE ─────────────────────────────────
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(morgan('dev'));
 app.use(hpp());
@@ -51,46 +51,46 @@ app.use(hpp());
 // ── CORS ────────────────────────────────────────────────
 const corsOptions = {
   origin: [
-  'http://localhost:3000',
-  'http://127.0.0.1:5500',
-  'http://localhost:5500',
-  'http://taskflowtms.sytes.net',
-  'http://taskflowtms.sytes.net:3000',
-  'https://taskflowtms.sytes.net',
-  process.env.CLIENT_URL
-].filter(Boolean),
+    'http://localhost:3000',
+    'http://127.0.0.1:5500',
+    'http://localhost:5500',
+    'http://taskflowtms.sytes.net',
+    'http://taskflowtms.sytes.net:3000',
+    'https://taskflowtms.sytes.net',
+    process.env.CLIENT_URL
+  ].filter(Boolean),
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 };
 app.use(cors(corsOptions));
 
-// ── Body Parser (ONCE only, with limit) ─────────────────
+// ── BODY PARSER ─────────────────
 app.use(express.json({ limit: '10kb' }));
 
-// ── Static Files ─────────────────────────────────────────
+// ── STATIC FILES ────────────────────────────────────────
 app.use('/uploads', express.static('uploads'));
 
-// Swagger Documentation
+// ── SWAGGER DOCUMENTATION ───────────────────────────────────
 app.use(
   '/api-docs',
   swaggerUi.serve,
   swaggerUi.setup(swaggerSpec)
 );
 
-// ── Routes ───────────────────────────────────────────────
-app.use('/api/auth',          authRoutes);
-app.use('/api/users',         userRoutes);
-app.use('/api/tasks',         taskRoutes);
+// ── ROUTES ───────────────────────────────────────────────
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/tasks', taskRoutes);
 app.use('/api/notifications', notificationRoutes);
-app.use('/api/projects',      projectRoutes); 
+app.use('/api/projects', projectRoutes);
 
-// ── Health Check ─────────────────────────────────────────
+// ── HEALTH CHECK ─────────────────────────────────────────
 app.get('/', (req, res) => {
   res.json({ message: 'TMS Server is running!' });
 });
 
-// ── 404 Handler ──────────────────────────────────────────
+// ── 404 HANDLER ──────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({
     errorCode: 404,
@@ -99,7 +99,7 @@ app.use((req, res) => {
   });
 });
 
-// ── Global Error Handler ─────────────────────────────────
+// ── GLOBAL ERROR HANDLER ───────────────────────────────────
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(err.status || 500).json({
@@ -109,7 +109,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ── Start Server ─────────────────────────────────────────
+// ── START SERVER ─────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
 
 sequelize.authenticate()
@@ -123,6 +123,6 @@ sequelize.authenticate()
     console.error('Database connection failed:', err);
   });
 
- 
+
 
 module.exports = { io };

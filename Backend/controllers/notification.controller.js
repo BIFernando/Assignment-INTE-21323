@@ -1,6 +1,6 @@
 const { Notification } = require('../models/index');
 
-// GET ALL NOTIFICATIONS FOR LOGGED IN USER
+// ── GET MY NOTIFICATIONS ──────────────────────────────────
 const getMyNotifications = async (req, res) => {
   try {
     const notifications = await Notification.findAll({
@@ -18,7 +18,7 @@ const getMyNotifications = async (req, res) => {
   }
 };
 
-// MARK A NOTIFICATION AS READ
+// ── MARK A NOTIFICATION AS READ ──────────────────────────────────
 const markAsRead = async (req, res) => {
   try {
     const { id } = req.params;
@@ -45,7 +45,7 @@ const markAsRead = async (req, res) => {
   }
 };
 
-// MARK ALL NOTIFICATIONS AS READ
+// ── MARK ALL NOTIFICATIONS AS READ ──────────────────────────────────
 const markAllAsRead = async (req, res) => {
   try {
 
@@ -71,7 +71,7 @@ const markAllAsRead = async (req, res) => {
   }
 };
 
-// GET UNREAD NOTIFICATION COUNT
+// ── GET UNREAD NOTIFICATION COUNT ──────────────────────────────────
 const getUnreadCount = async (req, res) => {
   try {
 

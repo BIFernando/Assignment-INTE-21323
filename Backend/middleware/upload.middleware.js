@@ -1,7 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 
-// Configure where and how files are stored
+// ── CONFIGURE FILE STORAGE ─────────────────────────────
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');
@@ -12,9 +12,8 @@ const storage = multer.diskStorage({
   },
 });
 
-// 🔓 TEMPORARILY ALLOW ALL FILE TYPES (for testing)
 const fileFilter = (req, file, cb) => {
-  cb(null, true); // accept any file
+  cb(null, true);e
 };
 
 const upload = multer({

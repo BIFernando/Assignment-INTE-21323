@@ -103,7 +103,7 @@ function renderSidebar(activePage) {
   document.body.insertAdjacentHTML('afterbegin', sidebar);
 }
 
-// Toast notification system
+// ── TOAST NOTIFICATIONS ──────────────────────────────────
 function showToast(title, message, type = 'info') {
   let container = document.getElementById('toastContainer');
   if (!container) {
@@ -220,12 +220,10 @@ async function loadNotifications() {
       </div>
     `).join('');
 
-    // Mark as read when panel opens
     notifications.filter(n => !n.isRead).forEach(n => {
       notificationAPI.markAsRead(n.id).catch(() => { });
     });
 
-    // Update badge to 0
     const badge = document.getElementById('notifBadge');
     if (badge) badge.style.display = 'none';
 
@@ -278,7 +276,6 @@ function renderConfirmDialog() {
   document.body.insertAdjacentHTML('beforeend', dialog);
 }
 
-// Drop-in replacement for confirm() — returns a Promise
 function appConfirm(title, message, okLabel = 'Delete') {
   return new Promise((resolve) => {
     const overlay = document.getElementById('confirmOverlay');
@@ -306,12 +303,10 @@ function appConfirm(title, message, okLabel = 'Delete') {
   });
 }
 
-// Call both renderers — runs once when auth.js loads
 document.addEventListener('DOMContentLoaded', () => {
   renderNotificationPanel();
   renderConfirmDialog();
-  
-  // Wire up notification bell button — attach directly
+
   const notifBtn = document.getElementById('notifBtn');
   if (notifBtn) {
     notifBtn.addEventListener('click', (e) => {

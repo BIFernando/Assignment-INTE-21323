@@ -2,7 +2,7 @@ const { Task, User, TaskAssignment } = require('../models/index');
 const { Op } = require('sequelize');
 const { createNotification } = require('../services/notification.service');
 
-// Simple XSS sanitiser
+// ── XSS SANITIZATION ──────────────────────────────────
 function sanitize(str) {
   if (typeof str !== 'string') return str;
   return str
@@ -25,7 +25,6 @@ const createTask = async (req, res) => {
       return res.status(400).json({ error: 'Project ID is required.' });
     }
 
-    // Check user is admin or project_manager in this project
     const { ProjectMember } = require('../models/index');
     const membership = await ProjectMember.findOne({
       where: { projectId, userId: req.user.id }
@@ -56,7 +55,6 @@ const createTask = async (req, res) => {
       createdBy: req.user.id,
     });
 
-    // Create TaskAssignments if assigneeIds provided
     if (assigneeIds && assigneeIds.length > 0) {
       const { TaskAssignment } = require('../models/index');
       const assignments = assigneeIds.map(userId => ({
@@ -66,7 +64,6 @@ const createTask = async (req, res) => {
       await TaskAssignment.bulkCreate(assignments);
     }
 
-    // Reload task with assignees
     const taskWithAssignees = await Task.findByPk(task.id, {
       include: [
         {
@@ -183,7 +180,6 @@ const updateTask = async (req, res) => {
       dueDate
     });
 
-    // Load task with assignees
     const taskWithAssignees = await Task.findByPk(id, {
       include: [
         {
@@ -227,7 +223,6 @@ const deleteTask = async (req, res) => {
       return res.status(404).json({ error: 'Task not found.' });
     }
 
-    // Check user is project admin or manager
     const { ProjectMember } = require('../models/index');
     const membership = await ProjectMember.findOne({
       where: { projectId: task.projectId, userId: req.user.id }
@@ -257,13 +252,11 @@ const assignUsers = async (req, res) => {
       return res.status(400).json({ error: 'No user IDs provided.' });
     }
 
-    // Find the task and get its project
     const task = await Task.findByPk(id);
     if (!task) {
       return res.status(404).json({ error: 'Task not found.' });
     }
 
-    // Check permission: only admin/project_manager can assign
     const { ProjectMember } = require('../models/index');
     const membership = await ProjectMember.findOne({
       where: { projectId: task.projectId, userId: req.user.id }

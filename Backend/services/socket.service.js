@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-// Store connected users
+// ── STORE CONNECTED USERS ───────────────────────────────────
 const connectedUsers = {};
 
 function initializeSocket(io) {
@@ -64,7 +64,7 @@ function initializeSocket(io) {
 
 }
 
-// Send notification to one user
+// ── SEND NOTIFICATION ───────────────────────────────────
 function sendNotification(
   io,
   userId,
@@ -79,7 +79,7 @@ function sendNotification(
   );
 }
 
-// Send notification to everyone
+// ── BROADCAST NOTIFICATION ───────────────────────────────────
 function broadcastNotification(
   io,
   notification

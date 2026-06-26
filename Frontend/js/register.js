@@ -1,19 +1,17 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-  // If already logged in, redirect to dashboard
   if (localStorage.getItem("token")) {
     window.location.href = "dashboard.html";
     return;
   }
 
   document.getElementById("registerBtn").addEventListener("click", async () => {
-    const name            = document.getElementById("name").value.trim();
-    const email           = document.getElementById("email").value.trim();
-    const password        = document.getElementById("password").value;
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
     const confirmPassword = document.getElementById("confirmPassword").value;
 
-    // Clear previous errors
-    ["nameError","emailError","passwordError","confirmError","errorAlert"]
+    ["nameError", "emailError", "passwordError", "confirmError", "errorAlert"]
       .forEach(id => {
         const el = document.getElementById(id);
         el.textContent = "";
@@ -67,7 +65,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Allow Enter key to submit
   document.addEventListener("keydown", (e) => {
     if (e.key === "Enter") document.getElementById("registerBtn").click();
   });
