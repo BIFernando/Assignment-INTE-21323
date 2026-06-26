@@ -312,6 +312,28 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('commentsOverlay').classList.remove('open');
   };
 
+  document.getElementById('addCommentBtn').addEventListener('click', async () => {
+    const input = document.getElementById('commentInput');
+    const content = input.value.trim();
+
+    if (!content) {
+      showToast('Error', 'Please write a comment before sending.', 'error');
+      return;
+    }
+
+    try {
+      document.getElementById('addCommentBtn').disabled = true;
+      await taskAPI.addComment(taskId, content);
+      input.value = '';
+      showToast('Success', 'Comment added.', 'success');
+      await loadComments();
+    } catch (err) {
+      showToast('Error', err.message, 'error');
+    } finally {
+      document.getElementById('addCommentBtn').disabled = false;
+    }
+  });
+
   // ── LOAD COMMENTS ────────────────────────────────
   async function loadComments() {
     const list = document.getElementById('commentsList');
