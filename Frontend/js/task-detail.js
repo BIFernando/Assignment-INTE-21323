@@ -15,6 +15,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let currentTask = null;
 
+  function markTasksListStale() {
+    try {
+      sessionStorage.setItem('tasksNeedReload', '1');
+    } catch (_) { /* ignore */ }
+  }
+
   function renderAssignees(assignees) {
     const names = assignees && assignees.length > 0
       ? assignees.map(a => a.name).join(', ')
@@ -78,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentTask.status = newStatus;
               }
               updateStatusSelect(newStatus);
+              markTasksListStale();
 
               showToast(
                 'Success',
@@ -85,7 +92,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 'success'
               );
 
-              await loadTaskDetail();
+              try {
+                await loadTaskDetail();
+              } catch (_) { /* keep optimistic status */ }
 
             } catch (err) {
               dropdown.value = originalValue;
@@ -112,7 +121,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function openAssigneesModal() {
-    if (!currentTask) return;
+    if (!currentTask) {
+      showToast('Error', 'Task is still loading. Please try again.', 'error');
+      return;
+    }
 
     try {
       const project = await projectAPI.getById(currentTask.projectId);
@@ -163,23 +175,27 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       try {
-        await taskAPI.assignUsers(taskId, userIds);
+        const numericIds = userIds.map(id => parseInt(id, 10));
+        await taskAPI.assignUsers(taskId, numericIds);
 
         const selectedNames = Array.from(select.selectedOptions)
           .map(opt => opt.textContent.trim().split('(')[0].trim());
 
         if (currentTask) {
-          currentTask.assignees = userIds.map((id, i) => ({
-            id: parseInt(id, 10),
+          currentTask.assignees = numericIds.map((id, i) => ({
+            id,
             name: selectedNames[i] || 'Unknown',
           }));
         }
 
         renderAssignees(currentTask ? currentTask.assignees : []);
+        markTasksListStale();
         closeAssigneesModal();
         showToast('Success', 'Assignees updated.', 'success');
 
-        await loadTaskDetail();
+        try {
+          await loadTaskDetail();
+        } catch (_) { /* keep optimistic assignees */ }
       } catch (err) {
         const errEl = document.getElementById('assigneesError');
         errEl.textContent = err.message;

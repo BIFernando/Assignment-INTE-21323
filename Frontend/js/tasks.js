@@ -251,4 +251,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadTasks();
 
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted || sessionStorage.getItem('tasksNeedReload')) {
+      sessionStorage.removeItem('tasksNeedReload');
+      loadTasks();
+    }
+  });
+
 }); 

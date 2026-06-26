@@ -172,13 +172,19 @@ const updateTask = async (req, res) => {
       await task.update({ status });
       return res.status(200).json({ message: 'Task status updated.' });
     }
-    await task.update({
-      title,
-      description,
-      priority,
-      status,
-      dueDate
-    });
+
+    const updates = {};
+    if (title !== undefined) updates.title = sanitize(title);
+    if (description !== undefined) updates.description = sanitize(description);
+    if (priority !== undefined) updates.priority = priority;
+    if (status !== undefined) updates.status = status;
+    if (dueDate !== undefined) updates.dueDate = dueDate;
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: 'No fields to update.' });
+    }
+
+    await task.update(updates);
 
     const taskWithAssignees = await Task.findByPk(id, {
       include: [
@@ -268,14 +274,13 @@ const assignUsers = async (req, res) => {
       });
     }
 
-    const users = await User.findAll({ where: { id: userIds } });
-    if (users.length !== userIds.length) {
+    const numericIds = userIds.map(id => parseInt(id, 10));
+    const users = await User.findAll({ where: { id: numericIds } });
+    if (users.length !== numericIds.length) {
       return res.status(400).json({ error: 'One or more user IDs are invalid.' });
     }
 
-    await TaskAssignment.destroy({ where: { taskId: id } });
-    const assignments = userIds.map(userId => ({ taskId: id, userId }));
-    await TaskAssignment.bulkCreate(assignments);
+    await task.setAssignees(users);
 
     res.status(200).json({ message: 'Task assigned successfully.' });
   } catch (err) {
