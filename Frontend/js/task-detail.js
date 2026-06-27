@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   let currentTask = null;
+  let projectMyRole = null;
 
   function markTasksListStale() {
     try {
@@ -54,6 +55,13 @@ document.addEventListener('DOMContentLoaded', () => {
           : 'No deadline'}`;
 
       renderAssignees(task.assignees);
+
+      try {
+        const project = await projectAPI.getById(task.projectId);
+        projectMyRole = project.myRole || null;
+      } catch (_) {
+        projectMyRole = null;
+      }
 
       // ── STATUS DROPDOWN ─────────────────────────────
       const statusSelector = document.getElementById('statusSelector');
@@ -334,6 +342,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  function canDeleteComment(comment) {
+    const uid = Number(user.id);
+    if (Number(comment.userId) === uid) return true;
+    if (user.role === 'admin' || user.role === 'project_manager') return true;
+    if (projectMyRole === 'admin' || projectMyRole === 'project_manager') return true;
+    return false;
+  }
+
   // ── LOAD COMMENTS ────────────────────────────────
   async function loadComments() {
     const list = document.getElementById('commentsList');
@@ -347,12 +363,39 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       list.innerHTML = comments.map(c => `
-        <div class="notif-item">
-          <div><strong>${c.author?.name || 'Unknown'}</strong></div>
-          <div>${c.content}</div>
-          <small>${timeAgo(c.createdAt)}</small>
+        <div class="notif-item" style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+          <div style="flex:1;">
+            <div><strong>${c.author?.name || 'Unknown'}</strong></div>
+            <div>${c.content}</div>
+            <small>${timeAgo(c.createdAt)}</small>
+          </div>
+          ${canDeleteComment(c) ? `
+            <button class="btn btn-danger btn-sm" data-comment-id="${c.id}" title="Delete comment">
+              <i class="bi bi-trash"></i>
+            </button>
+          ` : ''}
         </div>
       `).join('');
+
+      list.querySelectorAll('[data-comment-id]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const commentId = btn.dataset.commentId;
+          const ok = await appConfirm(
+            'Delete Comment?',
+            'This comment will be permanently removed.',
+            'Delete'
+          );
+          if (!ok) return;
+
+          try {
+            await taskAPI.deleteComment(taskId, commentId);
+            showToast('Success', 'Comment deleted.', 'success');
+            await loadComments();
+          } catch (err) {
+            showToast('Error', err.message, 'error');
+          }
+        });
+      });
 
     } catch (err) {
       list.innerHTML = `<div class="notif-empty">Could not load comments.</div>`;
