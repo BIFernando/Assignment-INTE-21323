@@ -281,19 +281,6 @@ Hosted on:
 
 ---
 
-# 👥 Team Members
-
-| Member   | Responsibility                   |
-| -------- | -------------------------------- |
-| Member 1 | Project Management               |
-| Member 2 | Authentication & User Management |
-| Member 3 | Task Management                  |
-| Member 4 | Frontend Development             |
-| Member 5 | Real-Time Notifications          |
-| Member 6 | DevOps, Docker & Deployment      |
-
----
-
 # 🔒 Security Features
 
 * JWT Authentication
