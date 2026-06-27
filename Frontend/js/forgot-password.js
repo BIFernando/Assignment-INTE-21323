@@ -21,13 +21,18 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.textContent = 'Sending...';
 
       try {
-        await fetch('/api/auth/forgot-password', {
+        const response = await fetch('/api/auth/forgot-password', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email })
         });
 
-        sucEl.textContent =
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.message || data.error || 'Something went wrong. Please try again.');
+        }
+
+        sucEl.textContent = data.message ||
           'If that email exists, a reset link has been sent. Check your inbox.';
         sucEl.classList.add('show');
 

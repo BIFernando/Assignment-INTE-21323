@@ -1,4 +1,4 @@
-const { Comment, User } = require('../models/index');
+const { Comment, User, Task, ProjectMember } = require('../models/index');
 
 // ── ADD COMMENT ────────────────────────────────────────
 const addComment = async (req, res) => {
@@ -57,11 +57,24 @@ const deleteComment = async (req, res) => {
       return res.status(404).json({ error: 'Comment not found.' });
     }
 
-    const isOwner = comment.userId === req.user.id;
-    const isAdmin = req.user.role === 'admin';
-    const isProjectManager = req.user.role === 'project_manager';
+    const isOwner = Number(comment.userId) === Number(req.user.id);
+    const isGlobalAdmin = req.user.role === 'admin';
+    const isGlobalProjectManager = req.user.role === 'project_manager';
 
-    if (!isOwner && !isAdmin && !isProjectManager) {
+    let isProjectElevated = false;
+    if (!isOwner && !isGlobalAdmin && !isGlobalProjectManager) {
+      const task = await Task.findByPk(comment.taskId);
+      if (task) {
+        const membership = await ProjectMember.findOne({
+          where: { projectId: task.projectId, userId: req.user.id },
+        });
+        if (membership && (membership.role === 'admin' || membership.role === 'project_manager')) {
+          isProjectElevated = true;
+        }
+      }
+    }
+
+    if (!isOwner && !isGlobalAdmin && !isGlobalProjectManager && !isProjectElevated) {
       return res.status(403).json({
         error: 'You can only delete your own comments.'
       });

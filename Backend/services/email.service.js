@@ -121,13 +121,48 @@ const sendWelcomeEmail = async (toEmail, name, tempPassword) => {
 
 const sendPasswordResetEmail = async (toEmail, name, token) => {
   const resetUrl = `${APP_URL}/pages/reset-password.html?token=${encodeURIComponent(token)}`;
+  const safeName = escape(name);
+
+  const htmlContent = emailLayout(`
+    <p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:#111827;">Hello <strong>${safeName}</strong>,</p>
+    <p style="margin:0 0 24px;font-size:15px;line-height:1.7;color:#374151;">
+      We received a request to reset your TaskFlow password. Click the button below to choose a new password.
+      This link expires in 1 hour.
+    </p>
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto 24px;">
+      <tr>
+        <td align="center" style="border-radius:8px;background-color:#4F46E5;">
+          <a href="${resetUrl}" target="_blank" style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:600;color:#FFFFFF;text-decoration:none;border-radius:8px;">Reset Password</a>
+        </td>
+      </tr>
+    </table>
+    <p style="margin:0 0 12px;font-size:13px;line-height:1.6;color:#6B7280;">
+      If the button does not work, copy and paste this link into your browser:
+    </p>
+    <p style="margin:0 0 24px;font-size:13px;line-height:1.6;color:#4F46E5;word-break:break-all;">
+      ${resetUrl}
+    </p>
+    <p style="margin:0;font-size:13px;line-height:1.6;color:#6B7280;">
+      If you did not request a password reset, you can safely ignore this email.
+    </p>
+  `);
+
   try {
     return await transporter.sendMail({
       from: FROM,
       to: toEmail,
       subject: 'Reset Your TaskFlow Password – Action Required',
-      text: `Hello ${name},\nReset your password here (expires in 1 hour): ${resetUrl}`,
-      html: `... your HTML ... use ${escape(name)} and ${resetUrl} ...`,
+      text: [
+        `Hello ${name},`,
+        '',
+        'We received a request to reset your TaskFlow password.',
+        'Use the link below to choose a new password (expires in 1 hour):',
+        '',
+        resetUrl,
+        '',
+        'If you did not request this, you can safely ignore this email.',
+      ].join('\n'),
+      html: htmlContent,
     });
   } catch (err) {
     console.error('Reset email failed:', err);
