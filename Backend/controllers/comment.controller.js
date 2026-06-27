@@ -57,8 +57,14 @@ const deleteComment = async (req, res) => {
       return res.status(404).json({ error: 'Comment not found.' });
     }
 
-    if (comment.userId !== req.user.id && req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'You can only delete your own comments.' });
+    const isOwner = comment.userId === req.user.id;
+    const isAdmin = req.user.role === 'admin';
+    const isProjectManager = req.user.role === 'project_manager';
+
+    if (!isOwner && !isAdmin && !isProjectManager) {
+      return res.status(403).json({
+        error: 'You can only delete your own comments.'
+      });
     }
 
     await comment.destroy();
