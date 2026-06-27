@@ -13,7 +13,7 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-  cb(null, true);e
+  cb(null, true);
 };
 
 const upload = multer({
